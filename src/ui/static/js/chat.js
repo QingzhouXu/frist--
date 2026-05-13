@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // 用户端脚本：负责心跳展示、SSE 流式聊天、Markdown 渲染和演示重置。
+    // 用户端脚本：负责状态展示、SSE 流式咨询、Markdown 渲染和演示重置。
     const merchantId = document.body.dataset.merchantId;
     const chatContainer = document.getElementById('chat-container');
     const messageInput = document.getElementById('message-input');
@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
             body: JSON.stringify({ merchant_id: merchantId })
         });
         chatContainer.innerHTML = '';
-        addMessage('演示已重置。您好，我是当前商家的 AI 客服，可以重新开始提问。', false);
+        addMessage('演示已重置。您好，我是当前商家的客服助手，可以重新开始提问。', false);
     });
 
     async function sendMessage(message) {
@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
         addMessage(text, true);
         messageInput.value = '';
 
-        const botMessage = addMessage('AI 思考中...', false, true);
+        const botMessage = addMessage('正在为您查询...', false, true);
         const textNode = botMessage.querySelector('.message-text');
         let fullText = '';
 
@@ -53,8 +53,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ message: text, merchant_id: merchantId })
             });
 
+            if (response.redirected) {
+                window.location.href = response.url;
+                return;
+            }
             if (!response.ok || !response.body) {
-                throw new Error('流式接口不可用');
+                throw new Error('咨询服务暂时不可用');
             }
 
             const reader = response.body.getReader();
@@ -74,14 +78,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         renderMarkdown(textNode, fullText);
                     }
                     if (parsed.event === 'error') {
-                        fullText += `\n\n${parsed.data.message || '流式输出中断'}`;
+                        fullText += `\n\n${parsed.data.message || '输出中断'}`;
                         renderMarkdown(textNode, fullText);
                     }
                 }
                 scrollToBottom();
             }
         } catch (error) {
-            const fallback = fullText || 'SSE 连接中断，当前对话已保留，请稍后重试。';
+            const fallback = fullText || '连接中断，当前对话已保留，请稍后重试。';
             renderMarkdown(textNode, fallback);
             console.error(error);
         }
@@ -116,7 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderMarkdown(element, markdown) {
-        // marked.js 为本地静态文件，比赛现场无外网也能渲染基础 Markdown。
+        // 本地 Markdown 渲染，比赛现场无外网也能展示表格、列表和加粗文本。
         element.classList.remove('thinking');
         if (window.marked) {
             element.innerHTML = marked.parse(markdown || '');
@@ -142,7 +146,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function startHeartbeat() {
-    // 每 5 秒请求开发板状态，成功时显示延迟和当前 Ollama 模型。
+    // 每 5 秒展示本地智能服务连接状态。
     const statusEl = document.getElementById('board-status');
     if (!statusEl) return;
 
@@ -152,14 +156,14 @@ function startHeartbeat() {
             const data = await response.json();
             if (data.status === 'success') {
                 statusEl.className = 'board-status online';
-                statusEl.textContent = `🟢 开发板已连接（${data.latency}ms） · ${data.model}`;
+                statusEl.textContent = `🟢 本地智能服务已连接（${data.latency}ms）`;
             } else {
                 statusEl.className = 'board-status offline';
-                statusEl.textContent = '🔴 开发板离线';
+                statusEl.textContent = '🔴 本地智能服务离线';
             }
         } catch {
             statusEl.className = 'board-status offline';
-            statusEl.textContent = '🔴 开发板离线';
+            statusEl.textContent = '🔴 本地智能服务离线';
         }
     }
 

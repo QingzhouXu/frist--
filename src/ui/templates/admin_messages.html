@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>访客咨询记录</title><link rel="stylesheet" href="/static/css/style.css"></head>
+<body class="merchant-page">
+    {% include "partials/merchant_sidebar.html" %}
+    <main class="merchant-main">
+        <h1>访客咨询记录</h1>
+        <section class="message-toolbar"><button class="primary-action">全部咨询</button><button class="soft-button">未读咨询</button><input placeholder="搜索咨询记录..."><button class="primary-action">搜索</button></section>
+        <section class="message-table">
+            <div class="table-row header"><span>访客信息</span><span>咨询内容摘要</span><span>时间</span><span>状态</span><span>操作</span></div>
+            <div class="table-row"><span>用户_李明</span><span>请问你们周末正常营业吗？营业时间有没有变化...</span><span>2024-01-15 14:32</span><span class="unread">未读</span><button>查看详情</button></div>
+            <div class="table-row"><span>用户_王芳</span><span>有没有会员卡可以办理？折扣力度怎么样？</span><span>2024-01-15 10:18</span><span>已读</span><button>查看详情</button></div>
+        </section>
+    </main>
+<script src="/static/js/admin_messages.js"></script>
+</body>
+</html>

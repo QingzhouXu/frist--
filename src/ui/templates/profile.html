@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人中心</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="client-page">
+    {% include "partials/client_nav.html" %}
+    <main class="profile-layout">
+        <aside class="profile-card">
+            <div class="profile-avatar-section">
+                <img src="/static/img/shops/avatar-user.svg" alt="头像" class="profile-avatar" id="current-avatar">
+                <button class="avatar-edit-btn" id="avatar-edit-btn">更换头像</button>
+                <input type="file" id="avatar-input" accept="image/jpeg,image/png" style="display: none;">
+            </div>
+            <h1 id="display-name">{{ current_user.display_name if current_user else '用户昵称_张三' }}</h1>
+            <p id="user-phone">138****8888</p>
+            <div class="profile-stats">
+                <strong><span id="favorites-count">0</span><small>收藏</small></strong>
+                <strong><span id="chats-count">0</span><small>咨询</small></strong>
+            </div>
+        </aside>
+        <section class="profile-functions">
+            <h2>个人资料</h2>
+            <div class="edit-form-section">
+                <form id="profile-edit-form" class="profile-form">
+                    <div class="form-group">
+                        <label for="edit-display-name">昵称</label>
+                        <input type="text" id="edit-display-name" name="display_name" value="{{ current_user.display_name if current_user else '用户昵称_张三' }}" placeholder="请输入昵称">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="edit-phone">手机号</label>
+                        <input type="tel" id="edit-phone" name="phone" placeholder="请输入手机号">
+                        <small>用于接收重要通知（选填）</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="edit-email">邮箱</label>
+                        <input type="email" id="edit-email" name="email" placeholder="请输入邮箱">
+                        <small>用于找回密码（选填）</small>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="primary-action">保存修改</button>
+                        <button type="button" class="soft-button" id="cancel-edit">取消</button>
+                    </div>
+                </form>
+            </div>
+            
+            <h2>我的功能</h2>
+            <div class="function-grid">
+                <a class="function-card" href="/favorites">
+                    <span>♡</span>
+                    <div><strong>我的收藏商铺</strong><small>查看已收藏的所有商铺</small></div>
+                </a>
+                <a class="function-card" href="/history">
+                    <span>○</span>
+                    <div><strong>历史咨询记录</strong><small>查看全部咨询历史</small></div>
+                </a>
+            </div>
+            <a href="/logout" class="danger-outline">退出登录</a>
+        </section>
+    </main>
+    <script src="/static/js/profile.js"></script>
+</body>
+</html>

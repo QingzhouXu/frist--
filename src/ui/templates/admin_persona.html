@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>AI形象生成</title><link rel="stylesheet" href="/static/css/style.css"></head>
+<body class="merchant-page">
+    {% include "partials/merchant_sidebar.html" %}
+    <main class="merchant-main">
+        <h1>AI形象生成</h1>
+        <section class="merchant-panel">
+            <h2>生成设置</h2>
+            <p class="muted-text">系统将基于您的店铺信息，一键生成专属客服形象，应用于客户咨询界面。</p>
+            <button class="soft-button">同步店铺信息</button>
+            <button class="primary-action">一键生成AI形象</button>
+        </section>
+        <section class="merchant-panel persona-result">
+            <h2>生成结果</h2>
+            <div class="persona-preview">▣<span>AI形象预览</span></div>
+            <div>
+                <h3>已生成形象：咖啡师小美</h3>
+                <p class="muted-text">形象特征：亲切友好、专业服务，代表星巴克品牌形象，可在客服咨询中使用。</p>
+                <button class="soft-button">重新生成</button>
+                <button class="primary-action">保存并上架展示</button>
+            </div>
+        </section>
+    </main>
+<script src="/static/js/admin_persona.js"></script>
+</body>
+</html>

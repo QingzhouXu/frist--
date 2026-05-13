@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商户工作台</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="merchant-page" data-merchant-id="{{ merchant.id }}">
+    {% include "partials/merchant_sidebar.html" %}
+    <main class="merchant-main">
+        <h1>工作台概览</h1>
+        <section class="metric-grid">
+            <div class="metric-card"><span>今日访客</span><strong>128</strong></div>
+            <div class="metric-card"><span>今日咨询</span><strong>34</strong></div>
+            <div class="metric-card"><span>累计收藏</span><strong>256</strong></div>
+            <div class="metric-card"><span>店铺评分</span><strong>{{ merchant.rating }}</strong></div>
+        </section>
+        <section class="merchant-panel">
+            <h2>快捷操作</h2>
+            <div class="quick-admin-actions">
+                <a class="primary-action" href="/admin/store">编辑店铺信息</a>
+                <a class="outline-action" href="/admin/persona">生成AI形象</a>
+                <a class="soft-button" href="/admin/messages">查看咨询消息</a>
+            </div>
+        </section>
+        <section class="merchant-panel faq-manager">
+            <div class="panel-heading">
+                <h2>常见问题管理</h2>
+                <span id="merchant-summary">正在加载...</span>
+            </div>
+            <div class="faq-layout">
+                <div id="knowledge-list" class="knowledge-list"></div>
+                <div class="faq-editor">
+                    <input id="knowledge-question" type="text" placeholder="用户可能会问的问题">
+                    <textarea id="knowledge-answer" rows="5" placeholder="客服应该如何回答"></textarea>
+                    <button id="add-knowledge" class="primary-action">保存问题</button>
+                    <input id="consult-question" type="text" value="你们招牌是什么？">
+                    <button id="test-consult" class="outline-action">模拟用户咨询</button>
+                    <div id="consult-result" class="result-box">等待测试...</div>
+                </div>
+            </div>
+        </section>
+    </main>
+    <script src="/static/js/admin.js"></script>
+</body>
+</html>

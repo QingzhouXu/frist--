@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商家管理后台 - AI智能客服平台</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        .merchant-portal {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .merchant-header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 20px 0;
+        }
+        
+        .merchant-header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .merchant-logo {
+            display: flex;
+            align-items: center;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .merchant-logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(45deg, #e74c3c, #f39c12);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 20px;
+        }
+        
+        .merchant-user-info {
+            display: flex;
+            align-items: center;
+            color: white;
+        }
+        
+        .merchant-avatar {
+            width: 36px;
+            height: 36px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+        }
+        
+        .merchant-main {
+            flex: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            width: 100%;
+        }
+        
+        .portal-welcome {
+            text-align: center;
+            color: white;
+            margin-bottom: 60px;
+        }
+        
+        .portal-welcome h1 {
+            font-size: 36px;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+        
+        .portal-welcome p {
+            font-size: 18px;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .portal-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .portal-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .portal-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(45deg, #e74c3c, #f39c12);
+        }
+        
+        .portal-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .portal-card-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(45deg, #3498db, #2ecc71);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        
+        .portal-card h3 {
+            font-size: 20px;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .portal-card p {
+            color: #7f8c8d;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        
+        .portal-card-action {
+            color: #3498db;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            transition: color 0.3s ease;
+        }
+        
+        .portal-card-action:hover {
+            color: #2980b9;
+        }
+        
+        .portal-card-action::after {
+            content: '→';
+            margin-left: 8px;
+            transition: transform 0.3s ease;
+        }
+        
+        .portal-card-action:hover::after {
+            transform: translateX(4px);
+        }
+        
+        .portal-stats {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .stat-number {
+            font-size: 32px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+        
+        .quick-actions {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+        }
+        
+        .quick-actions h3 {
+            font-size: 20px;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        
+        .quick-actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+        
+        .quick-action-btn {
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border: 2px solid transparent;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+        
+        .quick-action-btn:hover {
+            background: white;
+            border-color: #3498db;
+            color: #3498db;
+        }
+        
+        @media (max-width: 768px) {
+            .portal-welcome h1 {
+                font-size: 28px;
+            }
+            
+            .portal-welcome p {
+                font-size: 16px;
+            }
+            
+            .portal-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .quick-actions-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body class="merchant-portal">
+    <header class="merchant-header">
+        <div class="merchant-header-content">
+            <div class="merchant-logo">
+                <div class="merchant-logo-icon">🏪</div>
+                <span>商家管理后台</span>
+            </div>
+            <div class="merchant-user-info">
+                <div class="merchant-avatar">👤</div>
+                <span>{{ current_user.display_name if current_user else '未登录' }}</span>
+            </div>
+        </div>
+    </header>
+    
+    <main class="merchant-main">
+        <section class="portal-welcome">
+            <h1>欢迎来到商家管理后台</h1>
+            <p>一站式管理您的店铺信息、AI客服设置和客户咨询服务</p>
+        </section>
+        
+        {% if current_user %}
+        <section class="portal-stats">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-number">128</div>
+                    <div class="stat-label">今日访客</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">34</div>
+                    <div class="stat-label">今日咨询</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">256</div>
+                    <div class="stat-label">累计收藏</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">4.8</div>
+                    <div class="stat-label">店铺评分</div>
+                </div>
+            </div>
+        </section>
+        {% endif %}
+        
+        <section class="portal-grid">
+            <div class="portal-card" onclick="window.location.href='/admin'">
+                <div class="portal-card-icon">📊</div>
+                <h3>工作台概览</h3>
+                <p>查看店铺运营数据，管理常见问题，测试AI客服效果</p>
+                <a href="/admin" class="portal-card-action">进入工作台</a>
+            </div>
+            
+            <div class="portal-card" onclick="window.location.href='/admin/store'">
+                <div class="portal-card-icon">🏪</div>
+                <h3>店铺管理</h3>
+                <p>编辑店铺信息，上传图片，更新营业时间和联系方式</p>
+                <a href="/admin/store" class="portal-card-action">管理店铺</a>
+            </div>
+            
+            <div class="portal-card" onclick="window.location.href='/admin/persona'">
+                <div class="portal-card-icon">🤖</div>
+                <h3>AI形象设置</h3>
+                <p>定制专属AI客服形象，提升品牌识别度和用户体验</p>
+                <a href="/admin/persona" class="portal-card-action">设置形象</a>
+            </div>
+            
+            <div class="portal-card" onclick="window.location.href='/admin/messages'">
+                <div class="portal-card-icon">💬</div>
+                <h3>咨询记录</h3>
+                <p>查看客户咨询历史，分析服务质量，优化回复策略</p>
+                <a href="/admin/messages" class="portal-card-action">查看记录</a>
+            </div>
+            
+            <div class="portal-card" onclick="window.location.href='/admin/settings'">
+                <div class="portal-card-icon">⚙️</div>
+                <h3>账号设置</h3>
+                <p>管理登录安全，修改绑定信息，设置店铺权限</p>
+                <a href="/admin/settings" class="portal-card-action">账号设置</a>
+            </div>
+            
+            {% if current_user and current_user.role == 'super_admin' %}
+            <div class="portal-card" onclick="window.location.href='/platform/admin'">
+                <div class="portal-card-icon">🛡️</div>
+                <h3>平台管理</h3>
+                <p>审核商户入驻申请，管理平台规则，监控系统运行</p>
+                <a href="/platform/admin" class="portal-card-action">平台管理</a>
+            </div>
+            {% endif %}
+        </section>
+        
+        {% if current_user %}
+        <section class="quick-actions">
+            <h3>快捷操作</h3>
+            <div class="quick-actions-grid">
+                <a href="/admin" class="quick-action-btn">查看数据</a>
+                <a href="/admin/store" class="quick-action-btn">编辑店铺</a>
+                <a href="/admin/persona" class="quick-action-btn">AI设置</a>
+                <a href="/admin/messages" class="quick-action-btn">查看消息</a>
+                <a href="/logout" class="quick-action-btn">退出登录</a>
+            </div>
+        </section>
+        {% endif %}
+    </main>
+</body>
+</html>

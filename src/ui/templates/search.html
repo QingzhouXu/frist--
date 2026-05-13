@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>搜索店铺</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="client-page">
+    {% include "partials/client_nav.html" %}
+    <main class="client-main">
+        <section class="search-section">
+            <div class="search-container">
+                <div class="search-bar">
+                    <input type="text" id="search-input" placeholder="搜索店铺名称、类别或关键词..." value="{{ search_query or '' }}">
+                    <button id="search-btn" class="search-button">
+                        <span>🔍</span>
+                        搜索
+                    </button>
+                </div>
+                <div class="quick-filters">
+                    <button class="filter-btn active" data-category="all">全部</button>
+                    <button class="filter-btn" data-category="咖啡">咖啡</button>
+                    <button class="filter-btn" data-category="茶饮">茶饮</button>
+                    <button class="filter-btn" data-category="甜品">甜品</button>
+                    <button class="filter-btn" data-category="餐饮">餐饮</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="search-results">
+            <div class="results-header">
+                <h2>搜索结果</h2>
+                <div class="results-filters">
+                    <select id="sort-select">
+                        <option value="relevance">相关度排序</option>
+                        <option value="rating">评分最高</option>
+                        <option value="name">名称排序</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="shop-grid" id="shop-grid">
+                {% for item in merchants %}
+                <article class="shop-card">
+                    <img src="{{ item.cover }}" alt="{{ item.name }}" class="shop-cover">
+                    <div class="shop-card-body">
+                        <h2>{{ item.name }}</h2>
+                        <div class="shop-meta">
+                            <span>{{ item.category }}</span>
+                            <strong>{{ item.rating }}分</strong>
+                        </div>
+                        <p>{{ item.slogan }}</p>
+                        <div class="shop-actions">
+                            <button class="favorite-btn" data-merchant-id="{{ item.id }}" data-merchant-name="{{ item.name }}">
+                                <span class="heart-icon">🤍</span>
+                                收藏
+                            </button>
+                            <a class="primary-action" href="/chat?merchant={{ item.id }}">进店</a>
+                            <a class="outline-action" href="/chat?merchant={{ item.id }}">AI立即咨询</a>
+                        </div>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+            
+            {% if not merchants %}
+            <div class="no-results">
+                <div style="text-align: center; padding: 40px; color: #666;">
+                    <div style="font-size: 48px; margin-bottom: 16px;">🔍</div>
+                    <h3>没有找到相关店铺</h3>
+                    <p>试试调整搜索关键词或查看热门推荐</p>
+                </div>
+            </div>
+            {% endif %}
+        </section>
+    </main>
+    <script src="/static/js/search.js"></script>
+</body>
+</html>

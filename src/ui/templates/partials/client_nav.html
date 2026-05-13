@@ -1,0 +1,16 @@
+<header class="client-nav">
+    <a href="/" class="platform-logo">平台Logo</a>
+    <nav>
+        <a class="active" href="/">首页</a>
+        <a href="/search">搜索</a>
+        <a href="/categories">全部分类</a>
+        <a href="/favorites">我的收藏</a>
+        <a href="/profile">个人中心</a>
+        {% if current_user %}
+        <a class="login-pill" href="/logout">退出登录</a>
+        {% else %}
+        <a class="login-pill" href="/login">登录 / 注册</a>
+        {% endif %}
+        <a href="/official-support">客服帮助</a>
+    </nav>
+</header>

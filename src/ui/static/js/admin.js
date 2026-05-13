@@ -1,29 +1,31 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // 商家后台脚本：负责知识库 CRUD、商家切换和 RAG 命中测试。
-    const merchantSelect = document.getElementById('merchant-select');
+    const currentMerchantId = document.body.dataset.merchantId || 'tea_shop';
     const summary = document.getElementById('merchant-summary');
     const list = document.getElementById('knowledge-list');
     const questionInput = document.getElementById('knowledge-question');
     const answerInput = document.getElementById('knowledge-answer');
     const addButton = document.getElementById('add-knowledge');
-    const ragQuestion = document.getElementById('rag-question');
-    const ragResult = document.getElementById('rag-result');
-    const testButton = document.getElementById('test-rag');
+    const testQuestion = document.getElementById('consult-question');
+    const testResult = document.getElementById('consult-result');
+    const testButton = document.getElementById('test-consult');
 
-    startHeartbeat();
-    loadKnowledge();
+    if (!list) return;
 
-    merchantSelect.addEventListener('change', loadKnowledge);
-    addButton.addEventListener('click', addKnowledge);
-    testButton.addEventListener('click', testRag);
+    loadQuestions();
+    addButton?.addEventListener('click', addQuestion);
+    testButton?.addEventListener('click', testConsultation);
 
-    async function loadKnowledge() {
-        // 每次切换商家都重新读取数据，确保多商家知识隔离。
-        const merchantId = merchantSelect.value;
+    async function loadQuestions() {
         try {
-            const response = await fetch(`/api/knowledge?merchant=${encodeURIComponent(merchantId)}`);
+            const response = await fetch(`/api/knowledge?merchant=${encodeURIComponent(currentMerchantId)}`);
+            if (response.redirected) {
+                window.location.href = response.url;
+                return;
+            }
             const data = await response.json();
-            summary.textContent = `${data.merchant.name} · ${data.knowledge.length} 条知识 · 数据已隔离`;
+            if (summary) {
+                summary.textContent = `${data.merchant.name} · ${data.knowledge.length} 条常见问题`;
+            }
             list.innerHTML = '';
             data.knowledge.forEach((item) => {
                 const row = document.createElement('div');
@@ -32,76 +34,73 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div>
                         <strong>${escapeHtml(item.question)}</strong>
                         <p>${escapeHtml(item.answer)}</p>
-                        <small>${escapeHtml(item.category || '知识')}</small>
+                        <small>${escapeHtml(item.category || '常见问题')}</small>
                     </div>
                     <button data-id="${item.id}">删除</button>
                 `;
-                row.querySelector('button').addEventListener('click', () => deleteKnowledge(item.id));
+                row.querySelector('button').addEventListener('click', () => deleteQuestion(item.id));
                 list.appendChild(row);
             });
         } catch (error) {
-            summary.textContent = '知识库加载失败';
+            if (summary) summary.textContent = '内容加载失败';
             console.error(error);
         }
     }
 
-    async function addKnowledge() {
-        // 新增知识会立即写入 JSON 文件，并重建后端 TF-IDF 向量。
+    async function addQuestion() {
         const question = questionInput.value.trim();
         const answer = answerInput.value.trim();
         if (!question || !answer) {
             alert('请填写问题和回答');
             return;
         }
-
         const response = await fetch('/api/knowledge', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ merchant_id: merchantSelect.value, question, answer })
+            body: JSON.stringify({ merchant_id: currentMerchantId, question, answer })
         });
         const data = await response.json();
         if (data.success) {
             questionInput.value = '';
             answerInput.value = '';
-            await loadKnowledge();
+            await loadQuestions();
         } else {
-            alert(data.error || '新增失败');
+            alert(data.error || '保存失败');
         }
     }
 
-    async function deleteKnowledge(id) {
-        const response = await fetch(`/api/knowledge/${encodeURIComponent(id)}?merchant=${encodeURIComponent(merchantSelect.value)}`, {
+    async function deleteQuestion(id) {
+        const response = await fetch(`/api/knowledge/${encodeURIComponent(id)}?merchant=${encodeURIComponent(currentMerchantId)}`, {
             method: 'DELETE'
         });
         const data = await response.json();
         if (data.success) {
-            await loadKnowledge();
+            await loadQuestions();
         } else {
             alert('删除失败');
         }
     }
 
-    async function testRag() {
-        // 后台演示用接口，会展示黄金路径或 TF-IDF 的真实命中结果。
-        ragResult.textContent = '正在检索知识库...';
+    async function testConsultation() {
+        testResult.textContent = '正在模拟用户咨询...';
         try {
             const response = await fetch('/api/rag/test', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ merchant_id: merchantSelect.value, question: ragQuestion.value.trim() })
+                body: JSON.stringify({ merchant_id: currentMerchantId, question: testQuestion.value.trim() })
             });
             const data = await response.json();
             if (data.answer) {
-                ragResult.innerHTML = `
-                    <small>${data.source === 'golden' ? '黄金路径命中' : 'TF-IDF 命中'} · 相似度 ${Number(data.score).toFixed(2)}</small>
-                    <strong>命中的知识：</strong>
+                testResult.innerHTML = `
+                    <small>${data.source === 'stable' ? '稳定命中' : '相似问题命中'} · 匹配度 ${Number(data.score).toFixed(2)}</small>
+                    <strong>客服将回答：</strong>
                     <p>${escapeHtml(data.answer)}</p>
                 `;
             } else {
-                ragResult.textContent = data.message || '未命中知识库';
+                testResult.textContent = data.message || '暂未找到合适回答';
             }
         } catch (error) {
-            ragResult.textContent = 'RAG 测试失败';
+            testResult.textContent = '模拟咨询失败';
             console.error(error);
         }
     }
@@ -115,29 +114,3 @@ document.addEventListener('DOMContentLoaded', () => {
             .replaceAll("'", '&#039;');
     }
 });
-
-function startHeartbeat() {
-    // 后台同样展示开发板状态，让评委能看到边缘推理连接情况。
-    const statusEl = document.getElementById('board-status');
-    if (!statusEl) return;
-
-    async function refresh() {
-        try {
-            const response = await fetch('/api/heartbeat');
-            const data = await response.json();
-            if (data.status === 'success') {
-                statusEl.className = 'board-status online';
-                statusEl.textContent = `🟢 开发板已连接（${data.latency}ms） · ${data.model}`;
-            } else {
-                statusEl.className = 'board-status offline';
-                statusEl.textContent = '🔴 开发板离线';
-            }
-        } catch {
-            statusEl.className = 'board-status offline';
-            statusEl.textContent = '🔴 开发板离线';
-        }
-    }
-
-    refresh();
-    setInterval(refresh, 5000);
-}

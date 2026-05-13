@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>店铺信息编辑</title><link rel="stylesheet" href="/static/css/style.css"></head>
+<body class="merchant-page">
+    {% include "partials/merchant_sidebar.html" %}
+    <main class="merchant-main">
+        <h1>店铺信息编辑</h1>
+        <section class="merchant-panel">
+            <h2>图片管理</h2>
+            <div class="upload-row">
+                <div class="upload-box">▧<span>上传店铺封面</span><small>建议尺寸 1200×400px</small></div>
+                <div class="upload-box small">▣<span>上传形象照片</span><small>建议尺寸 600×600px</small></div>
+            </div>
+        </section>
+        <section class="merchant-panel">
+            <h2>基础信息</h2>
+            <label>店铺名称<input value="{{ merchant.name }}"></label>
+            <label>店铺简介<textarea rows="4">{{ merchant.slogan }}</textarea></label>
+        </section>
+        <div class="form-actions"><button class="soft-button">撤销修改</button><button class="primary-action">保存修改</button></div>
+    </main>
+<script src="/static/js/admin_store.js"></script>
+</body>
+</html>

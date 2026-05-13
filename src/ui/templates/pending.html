@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>入驻审核中</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="client-page">
+    {% include "partials/client_nav.html" %}
+    <main class="auth-wrap">
+        <section class="auth-card status-card">
+            <div class="status-icon">✓</div>
+            <h1>入驻审核中</h1>
+            <p>您的资料已提交，审核通过后即可使用商户工作台。</p>
+            {% if application %}
+            <div class="application-preview">
+                <span>商户名称：{{ application.merchant_name }}</span>
+                <span>经营范围：{{ application.category }}</span>
+                <span>联系方式：{{ application.contact }}</span>
+                <span>当前状态：待审核</span>
+            </div>
+            {% endif %}
+            <a class="primary-action" href="/">返回首页</a>
+        </section>
+    </main>
+</body>
+</html>

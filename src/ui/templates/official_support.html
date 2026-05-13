@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>官方客服 - AI智能客服平台</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        .official-support {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .support-header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 20px 0;
+        }
+        
+        .support-header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .support-logo {
+            display: flex;
+            align-items: center;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            text-decoration: none;
+        }
+        
+        .support-logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(45deg, #e74c3c, #f39c12);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 20px;
+        }
+        
+        .support-user-info {
+            display: flex;
+            align-items: center;
+            color: white;
+        }
+        
+        .support-avatar {
+            width: 36px;
+            height: 36px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+        }
+        
+        .support-main {
+            flex: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            width: 100%;
+            display: flex;
+            gap: 30px;
+        }
+        
+        .support-sidebar {
+            width: 300px;
+            flex-shrink: 0;
+        }
+        
+        .support-chat {
+            flex: 1;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            height: 600px;
+            overflow: hidden;
+        }
+        
+        .support-info-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .support-info-card h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .support-info-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            color: #555;
+        }
+        
+        .support-info-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .support-quick-links {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .support-quick-links h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .quick-link-item {
+            display: block;
+            padding: 12px 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            color: #555;
+            text-decoration: none;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .quick-link-item:hover {
+            background: #e9ecef;
+            color: #2c3e50;
+            transform: translateX(5px);
+        }
+        
+        .chat-header {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 15px 15px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .chat-header-info {
+            display: flex;
+            align-items: center;
+        }
+        
+        .chat-avatar {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 18px;
+        }
+        
+        .chat-status {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chat-name {
+            font-weight: 600;
+            font-size: 16px;
+        }
+        
+        .chat-status-text {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f8f9fa;
+        }
+        
+        .message {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+        }
+        
+        .message.user {
+            justify-content: flex-end;
+        }
+        
+        .message-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+        
+        .message.user .message-avatar {
+            margin-right: 0;
+            margin-left: 12px;
+            background: #667eea;
+            color: white;
+        }
+        
+        .message.official .message-avatar {
+            background: #28a745;
+            color: white;
+        }
+        
+        .message-content {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            position: relative;
+        }
+        
+        .message.official .message-content {
+            background: white;
+            color: #333;
+            border: 1px solid #e9ecef;
+        }
+        
+        .message.user .message-content {
+            background: #667eea;
+            color: white;
+        }
+        
+        .message-time {
+            font-size: 11px;
+            opacity: 0.7;
+            margin-top: 5px;
+        }
+        
+        .chat-input {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .chat-input-form {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .chat-input-field {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 25px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .chat-input-field:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .chat-send-btn {
+            padding: 12px 20px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .chat-send-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .chat-send-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        @media (max-width: 768px) {
+            .support-main {
+                flex-direction: column;
+            }
+            
+            .support-sidebar {
+                width: 100%;
+                order: 2;
+            }
+            
+            .support-chat {
+                height: 500px;
+                order: 1;
+            }
+            
+            .message-content {
+                max-width: 85%;
+            }
+        }
+    </style>
+</head>
+<body class="official-support">
+    <header class="support-header">
+        <div class="support-header-content">
+            <a href="/" class="support-logo">
+                <div class="support-logo-icon">🎯</div>
+                <span>官方客服</span>
+            </a>
+            <div class="support-user-info">
+                <div class="support-avatar">👤</div>
+                <span>{{ current_user.display_name if current_user else '访客用户' }}</span>
+            </div>
+        </div>
+    </header>
+    
+    <main class="support-main">
+        <aside class="support-sidebar">
+            <div class="support-info-card">
+                <h3>客服信息</h3>
+                <div class="support-info-item">
+                    <div class="support-info-icon">⏰</div>
+                    <span>工作时间：9:00 - 21:00</span>
+                </div>
+                <div class="support-info-item">
+                    <div class="support-info-icon">⚡</div>
+                    <span>平均响应：&lt; 30秒</span>
+                </div>
+                <div class="support-info-item">
+                    <div class="support-info-icon">🎯</div>
+                    <span>服务满意度：98%</span>
+                </div>
+            </div>
+            
+            <div class="support-quick-links">
+                <h3>快速帮助</h3>
+                <a href="/categories" class="quick-link-item">🏪 浏览商家</a>
+                <a href="/search" class="quick-link-item">🔍 搜索服务</a>
+                <a href="/favorites" class="quick-link-item">🤍 我的收藏</a>
+                <a href="/merchant/apply" class="quick-link-item">📝 商户入驻</a>
+                {% if not current_user %}
+                <a href="/login" class="quick-link-item">🔐 用户登录</a>
+                {% endif %}
+            </div>
+        </aside>
+        
+        <section class="support-chat">
+            <div class="chat-header">
+                <div class="chat-header-info">
+                    <div class="chat-avatar">🎯</div>
+                    <div class="chat-status">
+                        <div class="chat-name">官方客服助手</div>
+                        <div class="chat-status-text">在线服务中</div>
+                    </div>
+                </div>
+                <div class="chat-status-indicator">
+                    <span style="width: 8px; height: 8px; background: #28a745; border-radius: 50%; display: inline-block;"></span>
+                </div>
+            </div>
+            
+            <div class="chat-messages" id="chat-messages">
+                <div class="message official">
+                    <div class="message-avatar">🎯</div>
+                    <div class="message-content">
+                        <div>您好！欢迎使用AI智能客服平台！</div>
+                        <div>我是官方客服助手，有什么可以帮助您的吗？</div>
+                        <div class="message-time">刚刚</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chat-input">
+                <form class="chat-input-form" id="chat-form">
+                    <input type="text" class="chat-input-field" id="message-input" placeholder="请输入您的问题..." required>
+                    <button type="submit" class="chat-send-btn" id="send-btn">发送</button>
+                </form>
+            </div>
+        </section>
+    </main>
+    
+    <script src="/static/js/official_support.js"></script>
+</body>
+</html>

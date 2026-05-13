@@ -1,0 +1,107 @@
+{
+  "users": [
+    {
+      "id": "u_demo",
+      "username": "user",
+      "password": "123456",
+      "role": "customer",
+      "display_name": "用户昵称_张三"
+    },
+    {
+      "id": "m_tea",
+      "username": "tea",
+      "password": "123456",
+      "role": "merchant",
+      "display_name": "星巴克店长",
+      "merchant_id": "tea_shop",
+      "status": "approved"
+    },
+    {
+      "id": "m_pending",
+      "username": "pending",
+      "password": "123456",
+      "role": "merchant",
+      "display_name": "待审核商户",
+      "merchant_id": "pending_demo",
+      "status": "approved"
+    },
+    {
+      "id": "admin",
+      "username": "admin",
+      "password": "123456",
+      "role": "super_admin",
+      "display_name": "平台管理员"
+    },
+    {
+      "id": "447cfe9245",
+      "username": "",
+      "password": "",
+      "role": "merchant",
+      "display_name": " 管理员",
+      "merchant_id": "merchant_ff5e77f2",
+      "status": "pending"
+    },
+    {
+      "id": "32f4ba29ec",
+      "username": "111",
+      "password": "111",
+      "role": "merchant",
+      "display_name": "111 管理员",
+      "merchant_id": "merchant_946b0816",
+      "status": "approved",
+      "avatar_data": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIwAAACUCAYAAABBRcHIAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAATySURBVHhe7d1dbtpYGIfxl/ARtRM0mu4BdpLF5C5LyV0Wk514FyO16SQYMxfRSU/f+uP8weBj8/ykSOXYGNs8HLuoVWabzeZgQKIbPwC0IRhICAaSmXIPUxSFmZltt1u/6Dep67UJ27Ajt1MURefzTn2Na3TWYCxh3SanbiPl+SnrBPG6qq5tj0nSJakoit9OWHjsT2LdWJembTVJWV8JAZqkYFL4NzC8UV1v7iXFsfl9alvmbbfbz5+U8Sk5ORh/guMTFp84v965+H25xGue4lLnpS/J9zDhoPyn55iD9SH1MR74/Wxbv22Zd8xxBk3b9ttsWi8n8gxT94lIPdB49jkHv1/+MU4nzzBBX2+8366iaeapo16e/PE1zUbquJe6Xi6SggkHFZ/0cHBNb4I/eP88P36M1G117Wud1G2n8NsaM+mSFJ+0oubS5KWs06dtzSXPP8ZppBmmjf8U+9moaYZpEr9m6nOCU56ruuRr5SA5mLog4seej8Q/zzpO9jHLmvYliPejjbJNhT+OMUq6JE3hQNGPpGDqFC1f2OUi7FOO+zZWyZcklb8MXeKSlKJuP1KWxVLOR9c2gtTXzMXRM8xYPrVhJkx5k1O0xeo/DF2vGS/vWjcXSTNMzH8iuh4HdeN9nCRle9uGmS5oWla3XX+8TWN+WcyvV7dObo6eYcbGvxlhBoh/vKZxvy2vbnndturWy12vwfgT0vZmnNu2hxte/1z/uI1f1z/243XLcnT2S5J/3Ic4QHW7bfvTtqzJKfsyRnIwuG69XpIwfQQDCcFAQjCQHHXTuysr2+3N9pVZdajMbOZXwURJM0y5P9iP/yp7fT/Ybn+w6nAgliuTHMyurOzH297KSp6QMCFJwZT7g72+c+lBYjBvOy49+NAZzK6suAzhU3cwez+Ca9YZzL7yI7hmncF8fM8CfOgMhptdxBKCAX4hGEgIBhKCgYRgICEYSAgGEoKBhGAgIRhICAYSgoGEYCAhGEgIBhKCgYRgICEYSAgGEoKBhGAgIRhICAYSgoGEYCAhGEgIBhKCgYRgICEYSAgGEoKBhGAgIRhICAYSgoGEYCAhGEgIBhKCgYRgICEYSAgGEoKBhGAgIRhICAYSgoGEYCCZbTab1l8Z++/r5X9L6HK1stvl0hbzhc1u5jbjl8JlI6sZZrGY23q9tvVfd7Za3drNnFhyk00wy9XK1nd/23Kx9IuQkSyCWSzmdvf1jtlkBLII5suXr8QyEoMHs1ytuAyNyODB3C6JZUwGD2YxX/ghZGzwYGY3cz+EjA0fDDe7ozJ4MBgXgoGEYCAhGEgIBhKCgYRgICEYSAgGEoKBhGAgIRhICAaSqwzm8fneHp/v/TASXGUwOB7BQEIwkAz+X2W//fPND52s7v7k6eHl889h+dPDyx/rxuvhT5ObYR6f7+3p4eXzJx734nWRZnLB+DffP47Fy8Kf68LCL5MLBuc1uWDCdyzxD/ozqWDim9m6+xicblLB4PwmH0zqJSmendBsct/D+EDi71q6/iZELN0mFwzOa/KXJPSLYCAhGEgIBhKCgYRgICEYSAgGEoKBhGAgIRhICAYSgoGEYCAhGEgIBpLBgzm0/vMt5Gb4YKrz/os+9GvwYMp96YeQscGDedvt/BAyNngwu/d325VEMxaDB2Nm9vPnKze/I5FFMGW5t++v34lmBP4HG7hySxIrr4EAAAAASUVORK5CYII="
+    }
+  ],
+  "applications": [
+    {
+      "id": "app_pending_demo",
+      "merchant_id": "pending_demo",
+      "merchant_name": "云朵甜品",
+      "category": "甜品饮品",
+      "contact": "18800001111",
+      "license": "营业执照预览图.png",
+      "status": "approved",
+      "owner_username": "pending"
+    },
+    {
+      "id": "5e9112aa99",
+      "merchant_id": "merchant_ff5e77f2",
+      "merchant_name": "",
+      "category": "",
+      "contact": "",
+      "license": "资质证明预览.png",
+      "status": "pending",
+      "owner_username": ""
+    },
+    {
+      "id": "0f0888cac9",
+      "merchant_id": "merchant_946b0816",
+      "merchant_name": "111",
+      "category": "111",
+      "contact": "111",
+      "license": "111",
+      "status": "approved",
+      "owner_username": "111"
+    }
+  ],
+  "official_messages": [
+    {
+      "id": "1",
+      "type": "user",
+      "message": "呃",
+      "user_info": {
+        "username": "平台管理员",
+        "timestamp": "2026-05-08T13:50:25.950Z"
+      },
+      "timestamp": "2026-05-08T21:50:25.956259",
+      "status": "unread"
+    },
+    {
+      "id": "2",
+      "type": "official",
+      "message": "我理解您的问题。让我为您提供一些有用的信息和建议。",
+      "timestamp": "2026-05-08T21:50:25.956295",
+      "status": "sent"
+    }
+  ]
+}

@@ -1,0 +1,322 @@
+document.addEventListener('DOMContentLoaded', () => {
+    // 获取DOM元素
+    const searchInput = document.getElementById('search-input');
+    const searchBtn = document.getElementById('search-btn');
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    const shopGrid = document.getElementById('shop-grid');
+    
+    // 当前筛选状态
+    let currentCategory = 'all';
+    let currentSearch = '';
+    let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+    
+    // 初始化
+    initEventListeners();
+    updateFavoriteButtons();
+    
+    function initEventListeners() {
+        // 搜索功能
+        if (searchBtn) {
+            searchBtn.addEventListener('click', performSearch);
+        }
+        
+        if (searchInput) {
+            searchInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    performSearch();
+                }
+            });
+        }
+        
+        // 分类筛选
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                filterBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentCategory = btn.dataset.category;
+                filterMerchants();
+            });
+        });
+        
+        // 收藏按钮事件委托
+        if (shopGrid) {
+            shopGrid.addEventListener('click', (e) => {
+                if (e.target.closest('.favorite-btn')) {
+                    const btn = e.target.closest('.favorite-btn');
+                    toggleFavorite(btn);
+                }
+            });
+        }
+    }
+    
+    function performSearch() {
+        currentSearch = searchInput ? searchInput.value.trim() : '';
+        filterMerchants();
+    }
+    
+    function filterMerchants() {
+        const shopCards = document.querySelectorAll('.shop-card');
+        
+        shopCards.forEach(card => {
+            const merchantName = card.querySelector('h2').textContent.toLowerCase();
+            const merchantCategory = card.querySelector('.shop-meta span').textContent.toLowerCase();
+            const merchantSlogan = card.querySelector('p').textContent.toLowerCase();
+            
+            // 分类筛选
+            const categoryMatch = currentCategory === 'all' || merchantCategory.includes(currentCategory.toLowerCase());
+            
+            // 搜索筛选
+            const searchMatch = !currentSearch || 
+                merchantName.includes(currentSearch.toLowerCase()) ||
+                merchantCategory.includes(currentSearch.toLowerCase()) ||
+                merchantSlogan.includes(currentSearch.toLowerCase());
+            
+            // 显示或隐藏卡片
+            if (categoryMatch && searchMatch) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+        
+        // 检查是否有结果
+        checkNoResults();
+    }
+    
+    function checkNoResults() {
+        const visibleCards = document.querySelectorAll('.shop-card:not([style*="display: none"])');
+        let noResultsMsg = document.querySelector('.no-results');
+        
+        if (visibleCards.length === 0) {
+            if (!noResultsMsg) {
+                noResultsMsg = document.createElement('div');
+                noResultsMsg.className = 'no-results';
+                noResultsMsg.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #666;">
+                        <div style="font-size: 48px; margin-bottom: 16px;">🔍</div>
+                        <h3>没有找到相关店铺</h3>
+                        <p>试试调整搜索关键词或选择其他分类</p>
+                    </div>
+                `;
+                shopGrid.appendChild(noResultsMsg);
+            }
+        } else if (noResultsMsg) {
+            noResultsMsg.remove();
+        }
+    }
+    
+    function toggleFavorite(btn) {
+        const merchantId = btn.dataset.merchantId;
+        const merchantName = btn.dataset.merchantName;
+        const heartIcon = btn.querySelector('.heart-icon');
+        
+        const index = favorites.findIndex(fav => fav.merchantId === merchantId);
+        
+        if (index === -1) {
+            // 添加到收藏
+            favorites.push({
+                merchantId,
+                merchantName,
+                addedAt: new Date().toISOString()
+            });
+            heartIcon.textContent = '❤️';
+            showMessage(`已收藏 ${merchantName}`, 'success');
+        } else {
+            // 从收藏中移除
+            favorites.splice(index, 1);
+            heartIcon.textContent = '🤍';
+            showMessage(`已取消收藏 ${merchantName}`, 'info');
+        }
+        
+        // 保存到本地存储
+        localStorage.setItem('favorites', JSON.stringify(favorites));
+    }
+    
+    function updateFavoriteButtons() {
+        const favoriteBtns = document.querySelectorAll('.favorite-btn');
+        
+        favoriteBtns.forEach(btn => {
+            const merchantId = btn.dataset.merchantId;
+            const heartIcon = btn.querySelector('.heart-icon');
+            
+            if (favorites.some(fav => fav.merchantId === merchantId)) {
+                heartIcon.textContent = '❤️';
+            } else {
+                heartIcon.textContent = '🤍';
+            }
+        });
+    }
+    
+    function showMessage(message, type = 'info') {
+        // 移除已存在的消息
+        const existingMessage = document.querySelector('.message-toast');
+        if (existingMessage) existingMessage.remove();
+        
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message-toast ${type}`;
+        messageDiv.textContent = message;
+        messageDiv.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            border-radius: 6px;
+            color: white;
+            font-size: 14px;
+            z-index: 9999;
+            transition: all 0.3s ease;
+            transform: translateX(100%);
+        `;
+        
+        // 设置背景色
+        switch (type) {
+            case 'success':
+                messageDiv.style.backgroundColor = '#28a745';
+                break;
+            case 'error':
+                messageDiv.style.backgroundColor = '#dc3545';
+                break;
+            case 'info':
+                messageDiv.style.backgroundColor = '#17a2b8';
+                break;
+        }
+        
+        document.body.appendChild(messageDiv);
+        
+        // 显示动画
+        setTimeout(() => {
+            messageDiv.style.transform = 'translateX(0)';
+        }, 100);
+        
+        // 自动隐藏
+        setTimeout(() => {
+            messageDiv.style.transform = 'translateX(100%)';
+            setTimeout(() => {
+                if (messageDiv.parentNode) {
+                    messageDiv.parentNode.removeChild(messageDiv);
+                }
+            }, 300);
+        }, 3000);
+    }
+});
+
+// 收藏页面功能
+function showFavoritesPage() {
+    const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+    
+    // 创建收藏页面模态框
+    const modal = document.createElement('div');
+    modal.className = 'favorites-modal';
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    `;
+    
+    const modalContent = document.createElement('div');
+    modalContent.style.cssText = `
+        background: white;
+        border-radius: 8px;
+        padding: 24px;
+        max-width: 800px;
+        width: 90%;
+        max-height: 80vh;
+        overflow-y: auto;
+        position: relative;
+    `;
+    
+    let favoritesHTML = '';
+    if (favorites.length === 0) {
+        favoritesHTML = `
+            <div style="text-align: center; padding: 40px; color: #666;">
+                <div style="font-size: 48px; margin-bottom: 16px;">🤍</div>
+                <h3>还没有收藏的店铺</h3>
+                <p>去首页浏览并收藏你喜欢的店铺吧</p>
+            </div>
+        `;
+    } else {
+        favoritesHTML = '<div class="favorites-grid">';
+        favorites.forEach(fav => {
+            favoritesHTML += `
+                <div class="favorite-item">
+                    <h4>${fav.merchantName}</h4>
+                    <p>收藏时间：${new Date(fav.addedAt).toLocaleDateString()}</p>
+                    <div class="favorite-actions">
+                        <button class="primary-action" onclick="goToChat('${fav.merchantId}')">进店咨询</button>
+                        <button class="danger-outline" onclick="removeFavorite('${fav.merchantId}', this)">取消收藏</button>
+                    </div>
+                </div>
+            `;
+        });
+        favoritesHTML += '</div>';
+    }
+    
+    modalContent.innerHTML = `
+        <h3>我的收藏 (${favorites.length})</h3>
+        ${favoritesHTML}
+        <div style="text-align: right; margin-top: 20px;">
+            <button class="soft-button" onclick="closeFavoritesModal()">关闭</button>
+        </div>
+    `;
+    
+    modal.appendChild(modalContent);
+    document.body.appendChild(modal);
+    
+    // 点击背景关闭
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            document.body.removeChild(modal);
+        }
+    });
+    
+    // 全局函数
+    window.closeFavoritesModal = () => {
+        document.body.removeChild(modal);
+    };
+    
+    window.goToChat = (merchantId) => {
+        window.location.href = `/chat?merchant=${merchantId}`;
+    };
+    
+    window.removeFavorite = (merchantId, btn) => {
+        let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+        favorites = favorites.filter(fav => fav.merchantId !== merchantId);
+        localStorage.setItem('favorites', JSON.stringify(favorites));
+        
+        // 移除收藏项
+        const favoriteItem = btn.closest('.favorite-item');
+        favoriteItem.remove();
+        
+        // 更新计数
+        const title = modalContent.querySelector('h3');
+        title.textContent = `我的收藏 (${favorites.length})`;
+        
+        // 如果没有收藏了，显示空状态
+        if (favorites.length === 0) {
+            const grid = modalContent.querySelector('.favorites-grid');
+            grid.innerHTML = `
+                <div style="text-align: center; padding: 40px; color: #666;">
+                    <div style="font-size: 48px; margin-bottom: 16px;">🤍</div>
+                    <h3>还没有收藏的店铺</h3>
+                    <p>去首页浏览并收藏你喜欢的店铺吧</p>
+                </div>
+            `;
+        }
+        
+        showMessage('已取消收藏', 'info');
+        
+        // 更新首页收藏按钮状态
+        const favoriteBtn = document.querySelector(`[data-merchant-id="${merchantId}"]`);
+        if (favoriteBtn) {
+            const heartIcon = favoriteBtn.querySelector('.heart-icon');
+            heartIcon.textContent = '🤍';
+        }
+    };
+}

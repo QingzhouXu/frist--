@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ merchant.name }}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="/static/vendor/marked.min.js"></script>
+</head>
+<body class="client-page" data-merchant-id="{{ merchant.id }}">
+    {% include "partials/client_nav.html" %}
+    <main class="store-layout">
+        <section class="store-detail-card">
+            <div class="store-top-actions">
+                <a href="/" class="soft-button">‹ 返回列表</a>
+                <a href="/" class="soft-button">⌂ 返回首页</a>
+            </div>
+            <img src="{{ merchant.cover }}" alt="{{ merchant.name }}" class="store-hero-img">
+            <div class="store-info">
+                <div>
+                    <h1>{{ merchant.name }}</h1>
+                    <p>营业时间：{{ merchant.hours }} ｜ 地址：{{ merchant.address }} ｜ 综合评分：{{ merchant.rating }}分</p>
+                </div>
+                <div class="store-buttons">
+                    <button class="outline-action">♡ 收藏商铺</button>
+                    <button class="soft-button">⌘ 分享</button>
+                </div>
+            </div>
+        </section>
+
+        <aside class="chat-widget">
+            <header class="chat-widget-header">
+                <strong>AI智能客服</strong>
+                <span>在线</span>
+            </header>
+            <div class="chat-container" id="chat-container">
+                <div class="message bot-message">
+                    <div class="avatar bot-avatar">AI</div>
+                    <div class="message-content">
+                        <div class="message-text markdown-body">您好！欢迎来到本店，请问有什么可以帮助您的？</div>
+                    </div>
+                </div>
+            </div>
+            <div class="chat-input-panel">
+                <input type="text" id="message-input" placeholder="输入您的问题...">
+                <div class="chat-input-actions">
+                    <button id="reset-demo" class="soft-button">清空对话</button>
+                    <button id="send-button" class="send-button">发送</button>
+                </div>
+            </div>
+        </aside>
+    </main>
+    <script src="/static/js/chat.js"></script>
+</body>
+</html>

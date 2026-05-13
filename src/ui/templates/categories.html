@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>全部分类</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="client-page">
+    {% include "partials/client_nav.html" %}
+    <main class="client-main">
+        <section class="search-section">
+            <div class="search-container">
+                <div class="search-bar">
+                    <input type="text" id="search-input" placeholder="搜索店铺名称、类别或关键词...">
+                    <button id="search-btn" class="search-button">
+                        <span>🔍</span>
+                        搜索
+                    </button>
+                </div>
+                <div class="quick-filters">
+                    <button class="filter-btn active" data-category="all">全部</button>
+                    <button class="filter-btn" data-category="咖啡">咖啡</button>
+                    <button class="filter-btn" data-category="茶饮">茶饮</button>
+                    <button class="filter-btn" data-category="甜品">甜品</button>
+                    <button class="filter-btn" data-category="餐饮">餐饮</button>
+                </div>
+            </div>
+        </section>
+        <section class="section-title">
+            <h1>全部分类</h1>
+            <p>按类别浏览优质商家</p>
+        </section>
+        
+        <section class="categories-container">
+            {% for category, merchants in categories.items() %}
+            <div class="category-section">
+                <div class="category-header">
+                    <h2>{{ category }}</h2>
+                    <span class="category-count">{{ merchants|length }} 家店铺</span>
+                </div>
+                <div class="category-grid">
+                    {% for merchant in merchants %}
+                    <article class="shop-card">
+                        <img src="{{ merchant.cover }}" alt="{{ merchant.name }}" class="shop-cover">
+                        <div class="shop-card-body">
+                            <h3>{{ merchant.name }}</h3>
+                            <div class="shop-meta">
+                                <span>{{ merchant.category }}</span>
+                                <strong>{{ merchant.rating }}分</strong>
+                            </div>
+                            <p>{{ merchant.slogan }}</p>
+                            <div class="shop-actions">
+                                <button class="favorite-btn" data-merchant-id="{{ merchant.id }}" data-merchant-name="{{ merchant.name }}">
+                                    <span class="heart-icon">🤍</span>
+                                    收藏
+                                </button>
+                                <a class="primary-action" href="/chat?merchant={{ merchant.id }}">进店</a>
+                                <a class="outline-action" href="/chat?merchant={{ merchant.id }}">AI立即咨询</a>
+                            </div>
+                        </div>
+                    </article>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </section>
+    </main>
+    <script src="/static/js/categories.js"></script>
+</body>
+</html>
