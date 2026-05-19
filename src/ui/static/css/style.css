@@ -121,7 +121,7 @@ body {
     margin: 0;
     background: var(--background);
     color: var(--foreground);
-    transition: opacity 400ms cubic-bezier(0.65, 0, 0.35, 1);
+    transition: opacity 200ms cubic-bezier(0.65, 0, 0.35, 1);
 }
 
 html.page-entering body {
@@ -540,20 +540,43 @@ html.dark .theme-toggle-btn .moon-icon {
 .login-pill {
     padding: 10px 18px;
     border-radius: var(--radius);
-    background: var(--primary);
+    background: transparent;
     color: var(--primary-foreground) !important;
-    box-shadow: 0 2px 10px rgba(245, 158, 11, 0.3);
     position: relative;
-    overflow: hidden;
+    isolation: isolate;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     text-decoration: none;
+    transition: transform 0.3s ease-out;
+}
+.login-pill::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: var(--primary);
+    backdrop-filter: blur(8px) saturate(150%);
+    -webkit-backdrop-filter: blur(8px) saturate(150%);
+    box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,0.12),
+        inset 0 1.8px 3px 0px rgba(255,255,255,0.28),
+        inset -2px -2px 0px -2px rgba(255,255,255,0.18),
+        inset -3px -8px 1px -6px rgba(255,255,255,0.12),
+        inset -0.3px -1px 4px 0px rgba(0,0,0,0.06),
+        inset -1.5px 2.5px 0px -2px rgba(0,0,0,0.1),
+        inset 0px 3px 4px -2px rgba(0,0,0,0.1),
+        inset 2px -6.5px 1px -4px rgba(0,0,0,0.06),
+        0px 1px 5px 0px rgba(0,0,0,0.08),
+        0px 6px 16px 0px rgba(0,0,0,0.06);
+    transition: background 0.4s cubic-bezier(1, 0.0, 0.4, 1), box-shadow 0.4s cubic-bezier(1, 0.0, 0.4, 1);
 }
 
 .login-pill .btn-text {
     margin-right: 32px;
     transition: opacity 0.5s ease;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
 
 .login-pill .btn-arrow {
@@ -565,7 +588,9 @@ html.dark .theme-toggle-btn .moon-icon {
     border-radius: calc(var(--radius) - 2px);
     display: grid;
     place-items: center;
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
     transition: all 0.5s ease;
 }
 
@@ -583,6 +608,9 @@ html.dark .theme-toggle-btn .moon-icon {
     width: calc(100% - 8px);
 }
 
+.login-pill:hover {
+    transform: scale(1.04);
+}
 .login-pill:active {
     transform: scale(0.95);
 }
@@ -732,23 +760,60 @@ html.dark .theme-toggle-btn .moon-icon {
     border-radius: 24px;
     background: none;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: transform 0.3s ease-out, color 0.2s ease;
     font-size: 16px;
     color: var(--sidebar-foreground);
     text-align: left;
     width: 100%;
+    position: relative;
+    isolation: isolate;
 }
-
+.category-item-dark::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: transparent;
+    backdrop-filter: blur(8px) saturate(150%);
+    -webkit-backdrop-filter: blur(8px) saturate(150%);
+    box-shadow: none;
+    transition: background 0.4s cubic-bezier(1, 0.0, 0.4, 1), box-shadow 0.4s cubic-bezier(1, 0.0, 0.4, 1);
+}
 .category-item-dark:hover {
     background: var(--sidebar-accent);
+    transform: scale(1.04);
 }
-
+.category-item-dark:hover::after {
+    background: rgba(128,128,128,0.06);
+    box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,0.08),
+        inset 0 1.8px 3px 0px rgba(255,255,255,0.15),
+        inset -2px -2px 0px -2px rgba(255,255,255,0.1),
+        0px 1px 5px 0px rgba(0,0,0,0.04);
+}
 .category-item-dark.active {
-    background: var(--primary);
+    background: transparent;
     color: var(--primary-foreground);
     font-weight: 600;
     border-color: transparent;
-    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+    transform: scale(1.04);
+}
+.category-item-dark.active::after {
+    background: var(--primary);
+    box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,0.12),
+        inset 0 1.8px 3px 0px rgba(255,255,255,0.28),
+        inset -2px -2px 0px -2px rgba(255,255,255,0.18),
+        inset -3px -8px 1px -6px rgba(255,255,255,0.12),
+        inset -0.3px -1px 4px 0px rgba(0,0,0,0.06),
+        inset -1.5px 2.5px 0px -2px rgba(0,0,0,0.1),
+        inset 0px 3px 4px -2px rgba(0,0,0,0.1),
+        0px 1px 5px 0px rgba(0,0,0,0.08),
+        0px 6px 16px 0px rgba(0,0,0,0.06);
+}
+.category-item-dark:active {
+    transform: scale(0.96);
 }
 
 .category-icon-dark {
@@ -925,21 +990,50 @@ html.dark .theme-toggle-btn .moon-icon {
     justify-content: center;
     gap: 6px;
     padding: 10px 16px;
-    border: 1px solid var(--border);
+    border: none;
     border-radius: 12px;
-    background: var(--card);
+    background: transparent;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: transform 0.3s ease-out;
     font-size: 16px;
     font-weight: 500;
     color: var(--foreground);
     white-space: nowrap;
+    position: relative;
+    isolation: isolate;
 }
-
+.favorite-btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: var(--card);
+    backdrop-filter: blur(8px) saturate(150%);
+    -webkit-backdrop-filter: blur(8px) saturate(150%);
+    box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,0.08),
+        inset 0 1.8px 3px 0px rgba(255,255,255,0.15),
+        inset -2px -2px 0px -2px rgba(255,255,255,0.1),
+        0px 1px 5px 0px rgba(0,0,0,0.04),
+        0px 6px 16px 0px rgba(0,0,0,0.04);
+    transition: background 0.4s cubic-bezier(1, 0.0, 0.4, 1), box-shadow 0.4s cubic-bezier(1, 0.0, 0.4, 1), border-color 0.4s ease;
+}
 .favorite-btn:hover {
-    background: var(--accent);
-    border-color: var(--primary);
+    transform: scale(1.04);
     color: var(--foreground);
+}
+.favorite-btn:hover::after {
+    background: var(--accent);
+    box-shadow:
+        inset 0 0 0 1px var(--primary),
+        inset 0 1.8px 3px 0px rgba(255,255,255,0.2),
+        inset -2px -2px 0px -2px rgba(255,255,255,0.15),
+        0px 1px 5px 0px rgba(0,0,0,0.06),
+        0px 6px 16px 0px rgba(0,0,0,0.06);
+}
+.favorite-btn:active {
+    transform: scale(0.95);
 }
 
 .favorite-btn .heart-icon {
@@ -960,31 +1054,72 @@ html.dark .theme-toggle-btn .moon-icon {
     justify-content: center;
     gap: 6px;
     padding: 10px 16px;
-    border: 2px solid var(--primary);
+    border: none;
     border-radius: 12px;
-    background: var(--card);
+    background: transparent;
     color: var(--foreground);
     font-weight: 500;
     font-size: 16px;
     text-align: center;
     text-decoration: none;
-    transition: all 0.2s ease;
+    transition: transform 0.3s ease-out;
     white-space: nowrap;
-    box-shadow: 0 0 10px rgba(59, 130, 246, 0.3), inset 0 0 6px rgba(59, 130, 246, 0.1);
-    animation: glow-pulse 2.5s ease-in-out infinite;
+    position: relative;
+    isolation: isolate;
+}
+.outline-action-horizontal::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: var(--card);
+    backdrop-filter: blur(8px) saturate(150%);
+    -webkit-backdrop-filter: blur(8px) saturate(150%);
+    box-shadow:
+        inset 0 0 0 1px var(--primary),
+        inset 0 0 6px rgba(59,130,246,0.1),
+        inset 0 1.8px 3px 0px rgba(255,255,255,0.15),
+        0px 0px 10px rgba(59,130,246,0.3),
+        0px 1px 5px 0px rgba(0,0,0,0.04);
+    animation: glow-pulse-glass 2.5s ease-in-out infinite;
+    transition: background 0.4s cubic-bezier(1, 0.0, 0.4, 1), box-shadow 0.4s ease;
 }
 
-@keyframes glow-pulse {
-    0%, 100% { box-shadow: 0 0 10px rgba(59, 130, 246, 0.3), inset 0 0 6px rgba(59, 130, 246, 0.1); }
-    50% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.5), inset 0 0 10px rgba(59, 130, 246, 0.2); }
+@keyframes glow-pulse-glass {
+    0%, 100% {
+        box-shadow:
+            inset 0 0 0 1px var(--primary),
+            inset 0 0 6px rgba(59,130,246,0.1),
+            inset 0 1.8px 3px 0px rgba(255,255,255,0.15),
+            0px 0px 10px rgba(59,130,246,0.3),
+            0px 1px 5px 0px rgba(0,0,0,0.04);
+    }
+    50% {
+        box-shadow:
+            inset 0 0 0 1px var(--primary),
+            inset 0 0 12px rgba(59,130,246,0.2),
+            inset 0 1.8px 3px 0px rgba(255,255,255,0.2),
+            0px 0px 22px rgba(59,130,246,0.55),
+            0px 1px 5px 0px rgba(0,0,0,0.06);
+    }
 }
 
 .outline-action-horizontal:hover {
-    background: var(--accent);
-    border-color: var(--primary);
+    transform: scale(1.04);
     color: var(--foreground);
-    transform: translateY(-2px);
-    box-shadow: 0 0 25px rgba(59, 130, 246, 0.6), inset 0 0 12px rgba(59, 130, 246, 0.25);
+}
+.outline-action-horizontal:hover::after {
+    background: var(--accent);
+    box-shadow:
+        inset 0 0 0 1px var(--primary),
+        inset 0 0 14px rgba(59,130,246,0.25),
+        inset 0 1.8px 3px 0px rgba(255,255,255,0.25),
+        0px 0px 28px rgba(59,130,246,0.65),
+        0px 1px 5px 0px rgba(0,0,0,0.08);
+}
+.outline-action-horizontal:active {
+    transform: scale(0.95);
 }
 
 .outline-action-horizontal .action-icon {
@@ -1006,17 +1141,54 @@ html.dark .theme-toggle-btn .moon-icon {
     font-size: 20px;
     text-align: center;
     text-decoration: none;
-    transition: all 0.2s ease;
+    transition: transform 0.3s ease-out;
     min-height: 80px;
-    background: var(--primary);
+    background: transparent;
     color: var(--primary-foreground);
-    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+    position: relative;
+    isolation: isolate;
+    border: none;
 }
-
+.primary-action-horizontal::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: var(--primary);
+    backdrop-filter: blur(10px) saturate(150%);
+    -webkit-backdrop-filter: blur(10px) saturate(150%);
+    box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,0.14),
+        inset 0 1.8px 3px 0px rgba(255,255,255,0.30),
+        inset -2px -2px 0px -2px rgba(255,255,255,0.20),
+        inset -3px -8px 1px -6px rgba(255,255,255,0.14),
+        inset -0.3px -1px 4px 0px rgba(0,0,0,0.06),
+        inset -1.5px 2.5px 0px -2px rgba(0,0,0,0.12),
+        inset 0px 3px 4px -2px rgba(0,0,0,0.12),
+        inset 2px -6.5px 1px -4px rgba(0,0,0,0.06),
+        0px 1px 5px 0px rgba(0,0,0,0.08),
+        0px 6px 16px 0px rgba(0,0,0,0.06);
+    transition: background 0.4s cubic-bezier(1, 0.0, 0.4, 1), box-shadow 0.4s cubic-bezier(1, 0.0, 0.4, 1);
+}
 .primary-action-horizontal:hover {
+    transform: scale(1.04);
+}
+.primary-action-horizontal:hover::after {
     background: var(--chart-2);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+    box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,0.16),
+        inset 0 1.8px 3px 0px rgba(255,255,255,0.35),
+        inset -2px -2px 0px -2px rgba(255,255,255,0.25),
+        inset -3px -8px 1px -6px rgba(255,255,255,0.16),
+        inset -0.3px -1px 4px 0px rgba(0,0,0,0.08),
+        inset -1.5px 2.5px 0px -2px rgba(0,0,0,0.15),
+        inset 0px 3px 4px -2px rgba(0,0,0,0.15),
+        0px 1px 5px 0px rgba(0,0,0,0.10),
+        0px 8px 20px 0px rgba(0,0,0,0.08);
+}
+.primary-action-horizontal:active {
+    transform: scale(0.96);
 }
 
 .primary-action-horizontal .action-icon {
@@ -1112,17 +1284,100 @@ html.dark .theme-toggle-btn .moon-icon {
     flex: 1;
     overflow-y: auto;
     padding: 18px;
+    scroll-behavior: smooth;
 }
+
+/* Welcome card */
+.chat-welcome {
+    text-align: center;
+    padding: 32px 16px;
+    color: var(--muted-foreground);
+}
+.chat-welcome .welcome-avatar {
+    font-size: 56px;
+    margin-bottom: 12px;
+}
+.chat-welcome h3 {
+    margin: 0 0 6px;
+    font-size: 18px;
+    color: var(--foreground);
+}
+.chat-welcome p {
+    margin: 0;
+    font-size: 14px;
+}
+
+/* Store bar in chat header */
+.store-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.store-bar-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(255,255,255,0.4);
+}
+.store-bar-info strong {
+    font-size: 14px;
+    display: block;
+    line-height: 1.2;
+}
+.store-bar-status {
+    font-size: 12px;
+    opacity: 0.85;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* Status dot */
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+}
+.status-dot.online {
+    background: #22c55e;
+    animation: pulse-status 2s ease-in-out infinite;
+}
+.status-dot.offline {
+    background: #ef4444;
+}
+@keyframes pulse-status {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.3); }
+}
+
+/* Header badge */
+.header-badge {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.2);
+    color: var(--primary-foreground);
+}
+
+/* Messages */
 .message {
     display: flex;
     gap: 10px;
     margin-bottom: 16px;
+    animation: message-in 0.3s ease-out;
+}
+@keyframes message-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 .user-message { justify-content: flex-end; }
 .avatar {
-    width: 36px;
-    height: 36px;
-    flex: 0 0 36px;
+    width: 34px;
+    height: 34px;
+    flex: 0 0 34px;
     display: grid;
     place-items: center;
     border-radius: 50%;
@@ -1130,6 +1385,7 @@ html.dark .theme-toggle-btn .moon-icon {
     background: var(--primary);
     font-size: 12px;
     font-weight: 700;
+    flex-shrink: 0;
 }
 .user-message .avatar { order: 2; background: var(--muted-foreground); }
 .message-content { max-width: 76%; }
@@ -1141,15 +1397,155 @@ html.dark .theme-toggle-btn .moon-icon {
     line-height: 1.6;
     font-size: 14px;
     color: var(--foreground);
+    position: relative;
 }
 .user-message .message-text {
     background: var(--primary);
     color: var(--primary-foreground);
     border-color: var(--primary);
 }
+
+/* Speech bubble tails */
+.message-text::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    width: 0;
+    height: 0;
+    border: 8px solid transparent;
+}
+.bot-message .message-text::after {
+    left: -8px;
+    border-right-color: var(--border);
+    border-bottom: 0;
+}
+.user-message .message-text::after {
+    right: -8px;
+    border-left-color: var(--primary);
+    border-bottom: 0;
+}
+
+/* Message timestamp */
+.message-time {
+    font-size: 11px;
+    color: var(--muted-foreground);
+    margin-top: 4px;
+    padding: 0 2px;
+}
+
+/* Thinking indicator */
+.message-text.thinking {
+    color: var(--muted-foreground);
+    font-style: italic;
+}
+
+/* Typing indicator */
+.typing-indicator {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 14px 16px;
+}
+.typing-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--muted-foreground);
+    animation: bounce-dot 1.4s ease-in-out infinite;
+}
+.typing-dot:nth-child(1) { animation-delay: 0s; }
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce-dot {
+    0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+    40% { transform: scale(1); opacity: 1; }
+}
+
+/* Quick replies */
+.quick-replies {
+    display: flex;
+    gap: 8px;
+    padding: 10px 16px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    border-top: 1px solid var(--line);
+    flex-shrink: 0;
+}
+.quick-replies::-webkit-scrollbar { display: none; }
+.quick-reply-btn {
+    flex-shrink: 0;
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--foreground);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+.quick-reply-btn:hover {
+    background: var(--primary);
+    color: var(--primary-foreground);
+    border-color: var(--primary);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(59,130,246,0.3);
+}
+
+/* Chat input row — rounded pill */
+.chat-input-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 8px 14px;
+    padding: 4px 4px 4px 16px;
+    border: 1.5px solid var(--border);
+    border-radius: 24px;
+    background: var(--input);
+    transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+.chat-input-row:focus-within {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+}
+.chat-input-row input {
+    flex: 1;
+    height: 36px;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: var(--foreground);
+    font-size: 14px;
+}
+.chat-input-row input::placeholder {
+    color: var(--muted-foreground);
+}
+.send-btn-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: none;
+    background: var(--primary);
+    color: var(--primary-foreground);
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    flex-shrink: 0;
+}
+.send-btn-icon:hover {
+    transform: scale(1.08);
+    box-shadow: 0 2px 12px rgba(59,130,246,0.4);
+}
+.send-btn-icon:active {
+    transform: scale(0.95);
+}
+
+/* Deprecated input panel — kept for reference */
 .chat-input-panel {
     padding: 12px 16px;
     border-top: 1px solid var(--line);
+    display: none;
 }
 .chat-input-panel input {
     width: 100%;
@@ -1163,8 +1559,8 @@ html.dark .theme-toggle-btn .moon-icon {
 }
 .chat-input-actions {
     display: flex;
-    justify-content: space-between;
-    margin-top: 10px;
+    justify-content: center;
+    padding: 4px 14px 10px;
 }
 
 .profile-layout {

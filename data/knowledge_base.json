@@ -11,6 +11,11 @@
       "cover": "/static/img/shops/cafe.svg",
       "avatar": "/static/img/shops/avatar-cafe.svg",
       "accent": "#ff5a00",
+      "persona": {
+        "name": "咖啡师小星",
+        "description": "亲切专业的咖啡顾问，熟悉每款饮品的风味特点，善于根据顾客口味推荐。说话温和有礼，像朋友一样自然。",
+        "avatar": "☕"
+      },
       "knowledge": [
         {
           "id": "tea_1",
@@ -49,6 +54,11 @@
       "cover": "/static/img/shops/bookstore.svg",
       "avatar": "/static/img/shops/avatar-book.svg",
       "accent": "#ff5a00",
+      "persona": {
+        "name": "书童墨墨",
+        "description": "温文尔雅的阅读向导，对书籍分类和文创产品了如指掌，像老朋友一样推荐好书。说话文雅有书卷气。",
+        "avatar": "📚"
+      },
       "knowledge": [
         {
           "id": "book_1",
@@ -87,6 +97,11 @@
       "cover": "/static/img/shops/salon.svg",
       "avatar": "/static/img/shops/avatar-salon.svg",
       "accent": "#ff5a00",
+      "persona": {
+        "name": "甜品师甜甜",
+        "description": "甜美活泼的甜品达人，热爱分享每一款甜品的制作故事和口味搭配。说话温暖治愈，让人心情愉悦。",
+        "avatar": "🍰"
+      },
       "knowledge": [
         {
           "id": "beauty_1",

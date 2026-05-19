@@ -2,20 +2,41 @@
 # -*- coding: utf-8 -*-
 
 """
-Ollama / Qwen 客户端。
-使用 requests 真实请求本机 Ollama，不依赖 HuggingFace，本项目演示时更轻、更稳。
+多后端 LLM 客户端。
+支持 Ollama 本地模型、DashScope 云端 Qwen 模型和 Mock 兜底。
+通过 LLM_BACKEND 环境变量切换：ollama / dashscope / mock。
 """
 
 import json
 import os
 import time
+from abc import ABC, abstractmethod
 from typing import Dict, Iterable, List, Optional
 
 import requests
 
 
-class QwenClient:
-    """面向 Ollama 的轻量客户端，保留 QwenClient 类名以兼容旧代码。"""
+class BaseLLMClient(ABC):
+    """LLM 客户端抽象基类。"""
+
+    @abstractmethod
+    def chat(self, messages: List[Dict[str, str]], **kwargs) -> str:
+        """非流式聊天。"""
+
+    @abstractmethod
+    def stream_chat(self, messages: List[Dict[str, str]], **kwargs) -> Iterable[str]:
+        """流式聊天，逐块产出文本。"""
+
+    @abstractmethod
+    def heartbeat(self) -> Dict:
+        """返回模型状态与延迟。"""
+
+    def generate(self, prompt: str, **kwargs) -> str:
+        return self.chat([{"role": "user", "content": prompt}], **kwargs)
+
+
+class QwenOllamaClient(BaseLLMClient):
+    """面向 Ollama 的轻量客户端。"""
 
     def __init__(self, config: Optional[Dict] = None):
         self.config = {
@@ -31,7 +52,6 @@ class QwenClient:
             self.config.update(config)
 
     def chat(self, messages: List[Dict[str, str]], **kwargs) -> str:
-        """非流式聊天，用于普通 API 或兜底逻辑。"""
         payload = self._build_payload(messages, stream=False, kwargs=kwargs)
         try:
             response = requests.post(
@@ -48,33 +68,17 @@ class QwenClient:
             return f"模型返回解析失败：{exc}"
 
     def stream_chat(self, messages: List[Dict[str, str]], **kwargs) -> Iterable[str]:
-        """SSE 使用的真实流式聊天，逐块产出 Ollama 返回的内容。"""
-        payload = self._build_payload(messages, stream=True, kwargs=kwargs)
+        # 使用非流式请求获取完整回复后再逐字符输出。
+        # 推理模型（如 qwen3.5）会先输出 thinking 过程，流式时 content 长时间为空，
+        # 导致前端收不到内容。非流式模式下 content 包含最终回答，稳定可靠。
         try:
-            with requests.post(
-                f"{self.config['ollama_base']}/api/chat",
-                json=payload,
-                stream=True,
-                timeout=self.config["timeout"],
-            ) as response:
-                response.raise_for_status()
-                for line in response.iter_lines(decode_unicode=True):
-                    if not line:
-                        continue
-                    try:
-                        data = json.loads(line)
-                    except json.JSONDecodeError:
-                        continue
-                    content = data.get("message", {}).get("content", "")
-                    if content:
-                        yield content
-                    if data.get("done"):
-                        break
-        except requests.RequestException as exc:
-            yield f"\n\n开发板模型连接中断，已保留当前输出。错误信息：{exc}"
+            text = self.chat(messages, **kwargs)
+            for char in text:
+                yield char
+        except Exception as exc:
+            yield f"\n\n开发板模型连接中断。错误信息：{exc}"
 
     def heartbeat(self) -> Dict:
-        """检测 Ollama /api/tags，返回模型状态与延迟。"""
         started = time.perf_counter()
         try:
             response = requests.get(f"{self.config['ollama_base']}/api/tags", timeout=3)
@@ -84,12 +88,9 @@ class QwenClient:
             models = [item.get("name", "") for item in data.get("models", [])]
             configured_model = self.config["model_name"]
             model = configured_model if configured_model in models else (models[0] if models else configured_model)
-            return {"status": "success", "latency": latency, "model": model}
+            return {"status": "success", "latency": latency, "model": model, "backend": "ollama"}
         except Exception as exc:
-            return {"status": "error", "latency": None, "model": self.config["model_name"], "error": str(exc)}
-
-    def generate(self, prompt: str, **kwargs) -> str:
-        return self.chat([{"role": "user", "content": prompt}], **kwargs)
+            return {"status": "error", "latency": None, "model": self.config["model_name"], "backend": "ollama", "error": str(exc)}
 
     def _build_payload(self, messages: List[Dict[str, str]], stream: bool, kwargs: Dict) -> Dict:
         config = {**self.config, **kwargs}
@@ -106,11 +107,104 @@ class QwenClient:
         }
 
 
-class MockQwenClient(QwenClient):
-    """测试兜底客户端。正式 app.py 默认不会启用 mock。"""
+class QwenCloudClient(BaseLLMClient):
+    """DashScope 云端 Qwen 模型客户端（OpenAI 兼容接口）。"""
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, config: Optional[Dict] = None):
+        self.config = {
+            "api_key": os.getenv("DASHSCOPE_API_KEY", ""),
+            "base_url": os.getenv("DASHSCOPE_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1"),
+            "model_name": os.getenv("DASHSCOPE_MODEL", "qwen-plus"),
+            "temperature": 0.6,
+            "top_p": 0.9,
+            "max_tokens": 512,
+            "timeout": 120,
+        }
+        if config:
+            self.config.update(config)
+
+    def chat(self, messages: List[Dict[str, str]], **kwargs) -> str:
+        payload = self._build_payload(messages, stream=False, kwargs=kwargs)
+        try:
+            response = requests.post(
+                f"{self.config['base_url']}/chat/completions",
+                json=payload,
+                headers=self._headers(),
+                timeout=self.config["timeout"],
+            )
+            response.raise_for_status()
+            data = response.json()
+            return data.get("choices", [{}])[0].get("message", {}).get("content", "").strip() or "模型没有返回内容。"
+        except requests.RequestException as exc:
+            return f"云端模型暂时不可用，请稍后再试。错误信息：{exc}"
+        except (ValueError, KeyError, IndexError) as exc:
+            return f"模型返回解析失败：{exc}"
+
+    def stream_chat(self, messages: List[Dict[str, str]], **kwargs) -> Iterable[str]:
+        payload = self._build_payload(messages, stream=True, kwargs=kwargs)
+        try:
+            with requests.post(
+                f"{self.config['base_url']}/chat/completions",
+                json=payload,
+                headers=self._headers(),
+                stream=True,
+                timeout=self.config["timeout"],
+            ) as response:
+                response.raise_for_status()
+                for line in response.iter_lines(decode_unicode=True):
+                    if not line:
+                        continue
+                    if not line.startswith("data:"):
+                        continue
+                    data_str = line[5:].strip()
+                    if data_str == "[DONE]":
+                        break
+                    try:
+                        data = json.loads(data_str)
+                    except json.JSONDecodeError:
+                        continue
+                    delta = data.get("choices", [{}])[0].get("delta", {})
+                    content = delta.get("content", "")
+                    if content:
+                        yield content
+        except requests.RequestException as exc:
+            yield f"\n\n云端模型连接中断，已保留当前输出。错误信息：{exc}"
+
+    def heartbeat(self) -> Dict:
+        started = time.perf_counter()
+        try:
+            response = requests.get(
+                f"{self.config['base_url']}/models",
+                headers=self._headers(),
+                timeout=5,
+            )
+            latency = int((time.perf_counter() - started) * 1000)
+            if response.status_code == 200:
+                return {"status": "success", "latency": latency, "model": self.config["model_name"], "backend": "dashscope"}
+            return {"status": "error", "latency": latency, "model": self.config["model_name"], "backend": "dashscope", "error": f"HTTP {response.status_code}"}
+        except Exception as exc:
+            return {"status": "error", "latency": None, "model": self.config["model_name"], "backend": "dashscope", "error": str(exc)}
+
+    def _headers(self) -> Dict[str, str]:
+        return {
+            "Authorization": f"Bearer {self.config['api_key']}",
+            "Content-Type": "application/json",
+        }
+
+    def _build_payload(self, messages: List[Dict[str, str]], stream: bool, kwargs: Dict) -> Dict:
+        config = {**self.config, **kwargs}
+        return {
+            "model": config["model_name"],
+            "messages": messages,
+            "stream": stream,
+            "temperature": config.get("temperature", 0.6),
+            "top_p": config.get("top_p", 0.9),
+            "max_tokens": config.get("max_tokens", 512),
+        }
+
+
+class MockQwenClient(BaseLLMClient):
+    """测试兜底客户端。"""
 
     def chat(self, messages: List[Dict[str, str]], **kwargs) -> str:
         last_message = messages[-1]["content"]
@@ -122,15 +216,24 @@ class MockQwenClient(QwenClient):
             yield char
 
     def heartbeat(self) -> Dict:
-        return {"status": "success", "latency": 1, "model": "mock-qwen"}
+        return {"status": "success", "latency": 1, "model": "mock-qwen", "backend": "mock"}
 
 
 _default_client = None
 
 
-def get_qwen_client(config: Optional[Dict] = None, use_mock: bool = False) -> QwenClient:
-    """获取全局客户端，兼容旧项目调用方式。"""
+def get_qwen_client(config: Optional[Dict] = None, use_mock: bool = False, backend: Optional[str] = None) -> BaseLLMClient:
+    """获取全局 LLM 客户端。
+
+    后端选择优先级：backend 参数 > LLM_BACKEND 环境变量 > use_mock 参数。
+    """
     global _default_client
     if _default_client is None:
-        _default_client = MockQwenClient() if use_mock else QwenClient(config)
+        resolved = backend or os.getenv("LLM_BACKEND", "ollama")
+        if use_mock or resolved == "mock":
+            _default_client = MockQwenClient()
+        elif resolved == "dashscope":
+            _default_client = QwenCloudClient(config)
+        else:
+            _default_client = QwenOllamaClient(config)
     return _default_client

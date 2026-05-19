@@ -1,10 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // 用户端脚本：负责状态展示、SSE 流式咨询、Markdown 渲染和演示重置。
     const merchantId = document.body.dataset.merchantId;
     const chatContainer = document.getElementById('chat-container');
     const messageInput = document.getElementById('message-input');
     const sendButton = document.getElementById('send-button');
     const resetButton = document.getElementById('reset-demo');
+    const quickReplies = document.getElementById('quick-replies');
+    const backendBadge = document.getElementById('backend-badge');
 
     startHeartbeat();
 
@@ -12,9 +13,15 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    document.querySelectorAll('.quick-btn').forEach((button) => {
-        button.addEventListener('click', () => sendMessage(button.dataset.message || button.textContent));
-    });
+    // Quick reply buttons
+    if (quickReplies) {
+        quickReplies.addEventListener('click', (e) => {
+            const btn = e.target.closest('.quick-reply-btn');
+            if (!btn) return;
+            const msg = btn.dataset.message || btn.textContent.trim();
+            sendMessage(msg);
+        });
+    }
 
     sendButton.addEventListener('click', () => sendMessage(messageInput.value));
     messageInput.addEventListener('keydown', (event) => {
@@ -31,20 +38,35 @@ document.addEventListener('DOMContentLoaded', () => {
             body: JSON.stringify({ merchant_id: merchantId })
         });
         chatContainer.innerHTML = '';
-        addMessage('演示已重置。您好，我是当前商家的客服助手，可以重新开始提问。', false);
+        addWelcomeCard();
     });
 
+    function addWelcomeCard() {
+        chatContainer.innerHTML = `
+            <div class="chat-welcome">
+                <div class="welcome-avatar">🤖</div>
+                <h3>您好！欢迎光临</h3>
+                <p>我是您的 AI 客服助手，有什么可以帮助您的？</p>
+            </div>
+        `;
+    }
+
     async function sendMessage(message) {
-        // 使用 fetch 读取 text/event-stream，断流时保留已经生成的内容。
         const text = (message || '').trim();
         if (!text) return;
+
+        // Remove welcome card if present
+        var welcome = chatContainer.querySelector('.chat-welcome');
+        if (welcome) welcome.remove();
 
         addMessage(text, true);
         messageInput.value = '';
 
-        const botMessage = addMessage('正在为您查询...', false, true);
-        const textNode = botMessage.querySelector('.message-text');
-        let fullText = '';
+        var typingEl = showTypingIndicator();
+
+        var botMessage = addMessage('', false, true);
+        var textNode = botMessage.querySelector('.message-text');
+        var fullText = '';
 
         try {
             const response = await fetch('/api/chat/stream', {
@@ -60,6 +82,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok || !response.body) {
                 throw new Error('咨询服务暂时不可用');
             }
+
+            hideTypingIndicator(typingEl);
 
             const reader = response.body.getReader();
             const decoder = new TextDecoder('utf-8');
@@ -78,35 +102,58 @@ document.addEventListener('DOMContentLoaded', () => {
                         renderMarkdown(textNode, fullText);
                     }
                     if (parsed.event === 'error') {
-                        fullText += `\n\n${parsed.data.message || '输出中断'}`;
+                        fullText += '\n\n' + (parsed.data.message || '输出中断');
                         renderMarkdown(textNode, fullText);
                     }
                 }
                 scrollToBottom();
             }
+
+            if (!fullText) {
+                renderMarkdown(textNode, '收到回复，但内容为空。请再试一次。');
+                hideTypingIndicator(typingEl);
+            }
         } catch (error) {
+            hideTypingIndicator(typingEl);
             const fallback = fullText || '连接中断，当前对话已保留，请稍后重试。';
             renderMarkdown(textNode, fallback);
             console.error(error);
         }
     }
 
-    function addMessage(message, isUser, streaming = false) {
-        const messageDiv = document.createElement('div');
-        messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+    function showTypingIndicator() {
+        var el = document.createElement('div');
+        el.className = 'message bot-message typing-message';
+        el.innerHTML = '<div class="avatar bot-avatar">AI</div><div class="message-content"><div class="message-text typing-indicator"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div></div>';
+        chatContainer.appendChild(el);
+        scrollToBottom();
+        return el;
+    }
 
-        const avatarDiv = document.createElement('div');
-        avatarDiv.className = `avatar ${isUser ? 'user-avatar' : 'bot-avatar'}`;
+    function hideTypingIndicator(el) {
+        if (el && el.parentNode) {
+            el.remove();
+        }
+    }
+
+    function addMessage(message, isUser, streaming) {
+        var messageDiv = document.createElement('div');
+        messageDiv.className = 'message ' + (isUser ? 'user-message' : 'bot-message');
+
+        var avatarDiv = document.createElement('div');
+        avatarDiv.className = 'avatar ' + (isUser ? 'user-avatar' : 'bot-avatar');
         avatarDiv.textContent = isUser ? 'U' : 'AI';
 
-        const contentDiv = document.createElement('div');
+        var contentDiv = document.createElement('div');
         contentDiv.className = 'message-content';
 
-        const textDiv = document.createElement('div');
-        textDiv.className = `message-text markdown-body ${streaming ? 'thinking' : ''}`;
-        renderMarkdown(textDiv, message);
+        var textDiv = document.createElement('div');
+        textDiv.className = 'message-text markdown-body' + (streaming ? ' thinking' : '');
+        if (message) {
+            renderMarkdown(textDiv, message);
+        }
 
-        const timeDiv = document.createElement('div');
+        var timeDiv = document.createElement('div');
         timeDiv.className = 'message-time';
         timeDiv.textContent = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
 
@@ -120,7 +167,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderMarkdown(element, markdown) {
-        // 本地 Markdown 渲染，比赛现场无外网也能展示表格、列表和加粗文本。
         element.classList.remove('thinking');
         if (window.marked) {
             element.innerHTML = marked.parse(markdown || '');
@@ -141,29 +187,42 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function scrollToBottom() {
-        chatContainer.scrollTop = chatContainer.scrollHeight;
+        chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: 'smooth' });
     }
 });
 
 function startHeartbeat() {
-    // 每 5 秒展示本地智能服务连接状态。
     const statusEl = document.getElementById('board-status');
-    if (!statusEl) return;
+    const statusDot = document.getElementById('status-dot');
+    const backendBadge = document.getElementById('backend-badge');
 
     async function refresh() {
         try {
             const response = await fetch('/api/heartbeat');
             const data = await response.json();
-            if (data.status === 'success') {
-                statusEl.className = 'board-status online';
-                statusEl.textContent = `🟢 本地智能服务已连接（${data.latency}ms）`;
-            } else {
-                statusEl.className = 'board-status offline';
-                statusEl.textContent = '🔴 本地智能服务离线';
+
+            if (backendBadge) {
+                var backend = data.backend || 'ollama';
+                var labels = { dashscope: 'Qwen云端', ollama: '本地模型', mock: '演示模式' };
+                backendBadge.textContent = labels[backend] || backend;
+            }
+
+            if (statusEl) {
+                if (data.status === 'success') {
+                    statusEl.textContent = 'AI 客服在线（' + data.latency + 'ms）';
+                    if (statusDot) {
+                        statusDot.className = 'status-dot online';
+                    }
+                } else {
+                    statusEl.textContent = 'AI 客服离线';
+                    if (statusDot) {
+                        statusDot.className = 'status-dot offline';
+                    }
+                }
             }
         } catch {
-            statusEl.className = 'board-status offline';
-            statusEl.textContent = '🔴 本地智能服务离线';
+            if (statusEl) statusEl.textContent = 'AI 客服离线';
+            if (statusDot) statusDot.className = 'status-dot offline';
         }
     }
 

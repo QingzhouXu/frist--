@@ -52,14 +52,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function handleSearchInput() {
-        const loader = document.getElementById('search-loader');
-        const searchIcon = document.querySelector('.search-icon');
-        
+        var loader = document.getElementById('search-loader');
+        var searchIcon = document.querySelector('.search-icon');
+
         if (searchInput.value.trim()) {
-            loader.classList.add('active');
+            if (loader) loader.classList.add('active');
             if (searchIcon) searchIcon.style.display = 'none';
         } else {
-            loader.classList.remove('active');
+            if (loader) loader.classList.remove('active');
             if (searchIcon) searchIcon.style.display = 'flex';
         }
     }

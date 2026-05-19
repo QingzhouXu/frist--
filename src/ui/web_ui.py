@@ -820,6 +820,54 @@ class WebUI:
             except Exception as exc:
                 return jsonify({"error": f"保存失败：{exc}"}), 500
 
+        @self.app.route("/api/merchant/persona", methods=["GET"])
+        @self.login_required(["merchant", "super_admin"])
+        def get_merchant_persona():
+            merchant_id = self._merchant_scope(request.args.get("merchant", "tea_shop"))
+            kb = self.dialogue_manager.knowledge_base
+            merchant = kb.get_merchant(merchant_id)
+            persona = merchant.get("persona")
+            return jsonify({"persona": persona})
+
+        @self.app.route("/api/merchant/persona/generate", methods=["POST"])
+        @self.login_required(["merchant", "super_admin"])
+        def generate_merchant_persona():
+            data = request.get_json(silent=True) or {}
+            merchant_id = self._merchant_scope(data.get("merchant_id") or "tea_shop")
+            kb = self.dialogue_manager.knowledge_base
+            merchant = kb.get_merchant(merchant_id)
+            if not merchant:
+                return jsonify({"error": "商户不存在"}), 404
+
+            try:
+                prompt = (
+                    f"你是一位品牌形象设计师。请为以下店铺设计一个 AI 客服角色。\n"
+                    f"店铺名称：{merchant['name']}\n"
+                    f"店铺类别：{merchant.get('category', '')}\n"
+                    f"店铺简介：{merchant.get('slogan', '')}\n\n"
+                    "请返回一个 JSON 对象（只返回 JSON，不要其他文字），包含以下字段：\n"
+                    '"name": AI 角色的名字（2-4个字，要有亲和力和品牌感，不要带引号）,\n'
+                    '"description": AI 角色的性格描述（30-60字，包含说话风格和服务态度）,\n'
+                    '"avatar": 一个 emoji 表情代表这个角色\n'
+                    '例如：{"name":"咖啡师小星","description":"亲切专业的咖啡顾问，熟悉每款饮品的风味特点，善于根据顾客口味推荐。","avatar":"☕"}'
+                )
+                ai_response = self.dialogue_manager.llm_client.generate(prompt)
+
+                # Try to extract JSON from AI response
+                import re as _re
+                json_match = _re.search(r'\{[^{}]*"name"[^{}]*"description"[^{}]*"avatar"[^{}]*\}', ai_response, _re.DOTALL)
+                if json_match:
+                    persona = json.loads(json_match.group())
+                else:
+                    # Fallback: template-based generation
+                    raise ValueError("AI did not return valid JSON")
+
+                return jsonify({"success": True, "persona": persona})
+            except Exception:
+                # Fallback to template-based generation
+                persona = self._generate_persona_fallback(merchant)
+                return jsonify({"success": True, "persona": persona, "fallback": True})
+
         @self.app.route("/api/merchant/delete-account", methods=["POST"])
         @self.login_required(["merchant", "super_admin"])
         def delete_merchant_account():
@@ -862,6 +910,30 @@ class WebUI:
 
     def _generate_official_response(self, user_message: str) -> str:
         """生成官方客服回复"""
+
+    def _generate_persona_fallback(self, merchant: Dict) -> Dict:
+        """本地模板兜底生成 AI 形象。"""
+        name = merchant.get("name", "")
+        category = merchant.get("category", "")
+        slogan = merchant.get("slogan", "")
+
+        category_personas = {
+            "咖啡": {"prefix": "咖啡师", "avatar": "☕", "trait": "亲切专业的咖啡顾问，熟悉每款饮品的风味特点"},
+            "茶饮": {"prefix": "茶艺师", "avatar": "🍵", "trait": "温文尔雅的茶文化使者，精通各类茶饮搭配"},
+            "甜品": {"prefix": "甜品师", "avatar": "🍰", "trait": "甜美活泼的甜品达人，热爱分享制作故事和口味搭配"},
+            "餐饮": {"prefix": "美食家", "avatar": "🍽️", "trait": "热情周到的美食向导，擅长推荐菜品和搭配建议"},
+            "生活服务": {"prefix": "小助手", "avatar": "🤖", "trait": "细心体贴的服务顾问，用心解决每一位顾客的需求"},
+        }
+
+        info = category_personas.get(category, category_personas["生活服务"])
+        persona_name = f"{info['prefix']}小{name[0] if name else '店'}"
+        description = f"{info['trait']}，代表{name}品牌形象，{category}专业顾问。{slogan}"
+
+        return {
+            "name": persona_name,
+            "description": description,
+            "avatar": info["avatar"],
+        }
         message = user_message.lower()
         
         # 常见问题回复

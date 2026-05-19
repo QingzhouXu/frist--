@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c \"from pathlib import Path; c=Path\\('d:/Projects/frist--/src/ui/templates/auth.html'\\).read_text\\(encoding='utf-8'\\); print\\(f'Lines: {len\\(c.splitlines\\(\\)\\)}'\\); print\\('Jinja2 tags:', c.count\\('{%'\\)\\); print\\('Form fields:', 'username' in c and 'password' in c\\); print\\('3D tilt:', 'rotateX' in c\\); print\\('Beam anims:', 'beam-top' in c\\); print\\('Demo accounts:', 'tea' in c\\)\")",
+      "Bash(pip install *)",
+      "Bash(python -c \"import requests; print\\('requests OK'\\)\")",
+      "Bash(where python *)",
+      "Bash(where pip *)",
+      "Bash(/c/Anaconda3/python.exe -c \"import sys; sys.path.insert\\(0, 'src'\\); from llm.qwen_client import get_qwen_client, QwenCloudClient, QwenOllamaClient, MockQwenClient, BaseLLMClient; print\\('All imports OK'\\); c = get_qwen_client\\(use_mock=True\\); print\\('Mock:', type\\(c\\).__name__\\); print\\('Heartbeat:', c.heartbeat\\(\\)\\); print\\('Chat:', c.chat\\([{'role':'user','content':'hello'}]\\)\\)\")",
+      "Bash(/c/Anaconda3/python.exe -c ' *)",
+      "Bash(LLM_BACKEND=mock /c/Anaconda3/python.exe app.py)",
+      "Bash(curl -s http://127.0.0.1:5000/)",
+      "Bash(curl -s http://127.0.0.1:5000/chat?merchant=tea_shop -c /tmp/cookie.txt -b /tmp/cookie.txt)",
+      "Bash(curl -s -c /tmp/cookie.txt -b /tmp/cookie.txt -d \"username=user&password=123456\" http://127.0.0.1:5000/login -o /dev/null -w \"%{http_code}\")",
+      "Bash(curl -s -b /tmp/cookie.txt http://127.0.0.1:5000/chat?merchant=tea_shop)",
+      "Bash(curl -s http://127.0.0.1:11434/api/chat -d '{\"model\":\"qwen3.5:4b\",\"messages\":[{\"role\":\"user\",\"content\":\"你好\"}],\"stream\":false}')",
+      "Bash(curl -s http://127.0.0.1:11434/api/tags)",
+      "Bash(curl -s http://127.0.0.1:11434/api/chat -d '{\"model\":\"qwen3.5:4b\",\"messages\":[{\"role\":\"user\",\"content\":\"1+1\"}],\"stream\":false}')",
+      "Bash(/c/Anaconda3/python.exe -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('content:', d['message']['content'][:100]\\)\")",
+      "Bash(curl -s -c /tmp/cookie.txt -b /tmp/cookie.txt -d \"username=user&password=123456\" http://127.0.0.1:5000/login -o /dev/null)",
+      "Bash(curl -s -b /tmp/cookie.txt -X POST http://127.0.0.1:5000/api/chat/stream -H \"Content-Type: application/json\" -d '{\"message\":\"1+1等于几\",\"merchant_id\":\"tea_shop\"}')"
+    ]
+  }
+}

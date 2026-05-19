@@ -31,7 +31,7 @@
 
         setTimeout(function() {
             window.location.href = linkUrl.href;
-        }, 420);
+        }, 220);
     });
 
     if (document.documentElement.classList.contains('page-entering')) {

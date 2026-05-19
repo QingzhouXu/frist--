@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c ' *)",
+      "Bash(python -c \"import sys; sys.path.insert\\(0, 'src'\\); from llm.qwen_client import get_qwen_client, QwenCloudClient, QwenOllamaClient, MockQwenClient, BaseLLMClient; print\\('BaseLLMClient:', BaseLLMClient\\); print\\('QwenOllamaClient:', QwenOllamaClient\\); print\\('QwenCloudClient:', QwenCloudClient\\); print\\('MockQwenClient:', MockQwenClient\\); c = get_qwen_client\\(use_mock=True\\); print\\('Mock client type:', type\\(c\\).__name__\\); print\\('Mock heartbeat:', c.heartbeat\\(\\)\\); print\\('Mock chat:', c.chat\\([{'role':'user','content':'hello'}]\\)\\)\")"
+    ]
+  }
+}

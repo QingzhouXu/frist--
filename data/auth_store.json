@@ -138,6 +138,24 @@
       "message": "感谢您的咨询！我会尽力帮助您解决问题。请详细描述您的需求。",
       "timestamp": "2026-05-14T13:26:52.626528",
       "status": "sent"
+    },
+    {
+      "id": "7",
+      "type": "user",
+      "message": "666",
+      "user_info": {
+        "username": "用户昵称_张三",
+        "timestamp": "2026-05-19T04:15:45.765Z"
+      },
+      "timestamp": "2026-05-19T12:15:45.770659",
+      "status": "unread"
+    },
+    {
+      "id": "8",
+      "type": "official",
+      "message": "您的反馈对我们很重要。请告诉我更多详细信息，以便更好地帮助您。",
+      "timestamp": "2026-05-19T12:15:45.770659",
+      "status": "sent"
     }
   ]
 }

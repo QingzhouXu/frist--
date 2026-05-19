@@ -3,7 +3,7 @@
 
 """
 对话管理器。
-保持原有 DialogueManager 入口，新增多商家、真实 RAG 和 Ollama 流式输出能力。
+保持原有 DialogueManager 入口，新增多商家、真实 RAG 和 LLM 流式输出能力。
 """
 
 from typing import Dict, Iterable, List, Optional
@@ -15,9 +15,9 @@ from llm.qwen_client import get_qwen_client
 class DialogueManager:
     """智能客服对话管理器。"""
 
-    def __init__(self, use_mock_llm: bool = False):
+    def __init__(self, use_mock_llm: bool = False, backend: Optional[str] = None):
         self.knowledge_base = KnowledgeBase()
-        self.llm_client = get_qwen_client(use_mock=use_mock_llm)
+        self.llm_client = get_qwen_client(use_mock=use_mock_llm, backend=backend)
         self.knowledge_threshold = 0.18
         self.reset_dialogue()
 
@@ -68,7 +68,7 @@ class DialogueManager:
         self.dialogue_history = history
 
     def generate_response(self, user_input: str, merchant_id: str = "tea_shop") -> str:
-        """优先 RAG，未命中再问 Ollama。"""
+        """优先 RAG，未命中再问 LLM。"""
         rag = self.knowledge_base.query_with_score(user_input, merchant_id=merchant_id)
         if rag and rag["score"] >= self.knowledge_threshold:
             self.last_knowledge_answer = rag["answer"]
@@ -94,8 +94,19 @@ class DialogueManager:
     def _build_messages(self, user_input: str, merchant_id: str, rag: Optional[Dict]) -> List[Dict[str, str]]:
         merchant = self.knowledge_base.get_merchant(merchant_id)
         rag_text = rag["answer"] if rag else "当前问题未明确命中知识库，请基于商家身份给出简洁、诚实的客服回复。"
+
+        persona = merchant.get("persona")
+        if persona and persona.get("name"):
+            persona_block = (
+                f"你的名字是{persona['name']}，是{merchant['name']}的 AI 客服。"
+                f"{persona.get('description', '')}"
+                "请使用符合这个身份的语气和风格回复。"
+            )
+        else:
+            persona_block = f"你是{merchant['name']}的 AI 客服。"
+
         system_prompt = (
-            f"你是“{merchant['name']}”的 AI 客服，运行在本地开发板边缘 AI 环境中。"
+            f"{persona_block}"
             "请使用中文，回答要简洁、准确、像真实客服。"
             "如果知识库中没有明确依据，不要编造价格、库存或承诺。"
             "可以使用 Markdown 列表、表格和加粗来提升可读性。"
