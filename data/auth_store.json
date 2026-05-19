@@ -102,6 +102,42 @@
       "message": "我理解您的问题。让我为您提供一些有用的信息和建议。",
       "timestamp": "2026-05-08T21:50:25.956295",
       "status": "sent"
+    },
+    {
+      "id": "3",
+      "type": "user",
+      "message": "你是谁",
+      "user_info": {
+        "username": "访客用户",
+        "timestamp": "2026-05-14T05:26:28.781Z"
+      },
+      "timestamp": "2026-05-14T13:26:28.784149",
+      "status": "unread"
+    },
+    {
+      "id": "4",
+      "type": "official",
+      "message": "您的反馈对我们很重要。请告诉我更多详细信息，以便更好地帮助您。",
+      "timestamp": "2026-05-14T13:26:28.784149",
+      "status": "sent"
+    },
+    {
+      "id": "5",
+      "type": "user",
+      "message": "你干啥的",
+      "user_info": {
+        "username": "访客用户",
+        "timestamp": "2026-05-14T05:26:52.625Z"
+      },
+      "timestamp": "2026-05-14T13:26:52.626528",
+      "status": "unread"
+    },
+    {
+      "id": "6",
+      "type": "official",
+      "message": "感谢您的咨询！我会尽力帮助您解决问题。请详细描述您的需求。",
+      "timestamp": "2026-05-14T13:26:52.626528",
+      "status": "sent"
     }
   ]
 }
