@@ -62,6 +62,16 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
+    // Load chat history from localStorage
+    loadChatHistory(merchantId);
+
+    // Track merchant page visit
+    fetch('/api/merchant/visit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ merchant_id: merchantId })
+    }).catch(function() {});
+
     // Quick reply buttons
     if (quickReplies) {
         quickReplies.addEventListener('click', (e) => {
@@ -86,6 +96,12 @@ document.addEventListener('DOMContentLoaded', () => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ merchant_id: merchantId })
         });
+        // Clear localStorage history for this merchant
+        try {
+            var historyData = JSON.parse(localStorage.getItem('chat_history') || '{}');
+            delete historyData[merchantId];
+            localStorage.setItem('chat_history', JSON.stringify(historyData));
+        } catch (e) {}
         chatContainer.innerHTML = '';
         addWelcomeCard();
     });
@@ -98,6 +114,34 @@ document.addEventListener('DOMContentLoaded', () => {
                 <p>我是您的 AI 客服助手，有什么可以帮助您的？</p>
             </div>
         `;
+    }
+
+    function loadChatHistory(merchantId) {
+        try {
+            var historyData = JSON.parse(localStorage.getItem('chat_history') || '{}');
+            var merchantHistory = historyData[merchantId];
+            if (!merchantHistory || merchantHistory.length === 0) return;
+
+            // Remove welcome card since we have history
+            var welcome = chatContainer.querySelector('.chat-welcome');
+            if (welcome) welcome.remove();
+
+            merchantHistory.forEach(function(msg) {
+                var isUser = msg.role === 'user';
+                addMessage(msg.content, isUser);
+                // Set timestamp from history
+                var messageDivs = chatContainer.querySelectorAll('.message');
+                var lastMsg = messageDivs[messageDivs.length - 1];
+                if (lastMsg && msg.timestamp) {
+                    var timeDiv = lastMsg.querySelector('.message-time');
+                    if (timeDiv) {
+                        timeDiv.textContent = new Date(msg.timestamp).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+                    }
+                }
+            });
+        } catch (e) {
+            // Silently ignore localStorage errors
+        }
     }
 
     async function sendMessage(message) {
@@ -184,6 +228,12 @@ document.addEventListener('DOMContentLoaded', () => {
             // Save chat history to localStorage
             if (fullText) {
                 saveToHistory(merchantId, text, fullText);
+                // Track consultation
+                fetch('/api/merchant/consult', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ merchant_id: merchantId })
+                }).catch(function() {});
             }
         } catch (error) {
             hideTypingIndicator(typingEl);

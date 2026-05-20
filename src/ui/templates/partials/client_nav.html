@@ -19,6 +19,12 @@
         <a class="active" href="/">首页</a>
         <a href="/favorites">我的收藏</a>
         <a href="/official-support">客服帮助</a>
+        {% if current_user and current_user.role == 'merchant' %}
+        <a href="/admin">商家管理后台</a>
+        {% endif %}
+        {% if current_user and current_user.role == 'super_admin' %}
+        <a href="/platform/admin">平台管理中心</a>
+        {% endif %}
         {% if current_user %}
         <div class="user-avatar-pill">
             <div class="avatar-pill-trigger">

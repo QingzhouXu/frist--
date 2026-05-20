@@ -1,22 +1,32 @@
 document.addEventListener('DOMContentLoaded', () => {
     const currentMerchantId = document.body.dataset.merchantId || 'tea_shop';
-    
+
     // 表单元素
     const storeNameInput = document.getElementById('store-name');
     const storeSloganTextarea = document.getElementById('store-slogan');
+    const storeCategoryInput = document.getElementById('store-category');
+    const storeHoursInput = document.getElementById('store-hours');
+    const storeAddressInput = document.getElementById('store-address');
     const resetButton = document.querySelector('.form-actions .soft-button');
     const saveButton = document.querySelector('.form-actions .primary-action');
-    
+
     // 图片上传元素
     const coverUpload = document.querySelector('.upload-box');
     const avatarUpload = document.querySelector('.upload-box.small');
-    
+
+    // 存储上传的图片数据（base64）
+    let uploadedCover = null;
+    let uploadedAvatar = null;
+
     // 原始数据备份
     let originalData = {
         name: storeNameInput ? storeNameInput.value : '',
-        slogan: storeSloganTextarea ? storeSloganTextarea.value : ''
+        slogan: storeSloganTextarea ? storeSloganTextarea.value : '',
+        category: storeCategoryInput ? storeCategoryInput.value : '',
+        hours: storeHoursInput ? storeHoursInput.value : '',
+        address: storeAddressInput ? storeAddressInput.value : ''
     };
-    
+
     // 图片上传处理
     if (coverUpload) {
         coverUpload.addEventListener('click', () => {
@@ -26,13 +36,15 @@ document.addEventListener('DOMContentLoaded', () => {
             input.onchange = (e) => {
                 const file = e.target.files[0];
                 if (file) {
-                    previewImage(coverUpload, file);
+                    previewImage(coverUpload, file, function(base64) {
+                        uploadedCover = base64;
+                    });
                 }
             };
             input.click();
         });
     }
-    
+
     if (avatarUpload) {
         avatarUpload.addEventListener('click', () => {
             const input = document.createElement('input');
@@ -41,69 +53,88 @@ document.addEventListener('DOMContentLoaded', () => {
             input.onchange = (e) => {
                 const file = e.target.files[0];
                 if (file) {
-                    previewImage(avatarUpload, file);
+                    previewImage(avatarUpload, file, function(base64) {
+                        uploadedAvatar = base64;
+                    });
                 }
             };
             input.click();
         });
     }
-    
+
     // 重置按钮功能
     if (resetButton) {
         resetButton.addEventListener('click', () => {
             if (confirm('确定要撤销所有修改吗？')) {
                 if (storeNameInput) storeNameInput.value = originalData.name;
                 if (storeSloganTextarea) storeSloganTextarea.value = originalData.slogan;
-                
+                if (storeCategoryInput) storeCategoryInput.value = originalData.category;
+                if (storeHoursInput) storeHoursInput.value = originalData.hours;
+                if (storeAddressInput) storeAddressInput.value = originalData.address;
                 // 重置图片预览
                 const coverPreview = coverUpload?.querySelector('img');
                 const avatarPreview = avatarUpload?.querySelector('img');
                 if (coverPreview) coverPreview.remove();
                 if (avatarPreview) avatarPreview.remove();
-                
+                uploadedCover = null;
+                uploadedAvatar = null;
+
                 showMessage('已撤销所有修改', 'info');
             }
         });
     }
-    
+
     // 保存按钮功能
     if (saveButton) {
         saveButton.addEventListener('click', async () => {
             const formData = {
+                merchant_id: currentMerchantId,
                 name: storeNameInput ? storeNameInput.value.trim() : '',
-                slogan: storeSloganTextarea ? storeSloganTextarea.value.trim() : ''
+                slogan: storeSloganTextarea ? storeSloganTextarea.value.trim() : '',
+                category: storeCategoryInput ? storeCategoryInput.value.trim() : '',
+                hours: storeHoursInput ? storeHoursInput.value.trim() : '',
+                address: storeAddressInput ? storeAddressInput.value.trim() : ''
             };
-            
+
             // 验证表单
             if (!formData.name) {
                 showMessage('请填写店铺名称', 'error');
                 return;
             }
-            
+
             if (!formData.slogan) {
                 showMessage('请填写店铺简介', 'error');
                 return;
             }
-            
+
+            // 添加上传的图片数据
+            if (uploadedCover) formData.cover_image = uploadedCover;
+            if (uploadedAvatar) formData.avatar_image = uploadedAvatar;
+
             try {
                 saveButton.disabled = true;
                 saveButton.textContent = '保存中...';
-                
+
                 const response = await fetch('/api/merchant/store', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({
-                        merchant_id: currentMerchantId,
-                        ...formData
-                    })
+                    body: JSON.stringify(formData)
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (data.success) {
-                    originalData = { ...formData };
+                    originalData = {
+                        name: formData.name,
+                        slogan: formData.slogan,
+                        category: formData.category,
+                        hours: formData.hours,
+                        address: formData.address
+                    };
+                    uploadedCover = null;
+                    uploadedAvatar = null;
                     showMessage('店铺信息保存成功', 'success');
                 } else {
                     showMessage(data.error || '保存失败', 'error');
@@ -117,18 +148,20 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-    
-    // 图片预览功能
-    function previewImage(container, file) {
+
+    // 图片预览功能（回调返回 base64 数据）
+    function previewImage(container, file, callback) {
         const reader = new FileReader();
         reader.onload = (e) => {
+            const base64Data = e.target.result;
+
             // 移除已存在的预览图
             const existingImg = container.querySelector('img');
             if (existingImg) existingImg.remove();
-            
+
             // 创建新的预览图
             const img = document.createElement('img');
-            img.src = e.target.result;
+            img.src = base64Data;
             img.style.cssText = `
                 position: absolute;
                 top: 0;
@@ -138,15 +171,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 object-fit: cover;
                 border-radius: 8px;
             `;
-            
+
             container.style.position = 'relative';
             container.appendChild(img);
-            
+
             // 调整文字层级
             const text = container.querySelector('span');
             const small = container.querySelector('small');
             if (text) text.style.zIndex = '1';
             if (small) small.style.zIndex = '1';
+
+            // 回调返回 base64 数据
+            if (callback) callback(base64Data);
         };
         reader.readAsDataURL(file);
     }

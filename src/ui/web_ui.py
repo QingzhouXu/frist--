@@ -6,6 +6,7 @@ Flask Web 层。
 提供客户端、商户端、平台审核、流式咨询和常见问题管理能力。
 """
 
+import base64
 import json
 import os
 import re
@@ -334,7 +335,9 @@ class WebUI:
             if user["role"] == "merchant" and user.get("status") != "approved":
                 application = next((item for item in self.auth.data["applications"] if item["owner_username"] == user["username"]), None)
                 return render_template("pending.html", application=application)
-            return render_template("admin_dashboard.html", merchant=self._current_merchant(), merchants=self._admin_merchants())
+            merchant = self._current_merchant()
+            stats = self._get_merchant_stats(merchant["id"]) if merchant else {}
+            return render_template("admin_dashboard.html", merchant=merchant, merchants=self._admin_merchants(), stats=stats)
 
         @self.app.route("/admin/store")
         @self.login_required(["merchant", "super_admin"])
@@ -508,6 +511,7 @@ class WebUI:
                 "message": reply_message,
                 "original_message_id": message_id,
                 "admin_user": current_user["username"],
+                "username": original_message.get("username", ""),
                 "timestamp": datetime.datetime.now().isoformat()
             }
             messages.append(admin_reply)
@@ -768,24 +772,85 @@ class WebUI:
             merchant_id = self._merchant_scope(data.get("merchant_id") or "tea_shop")
             name = (data.get("name") or "").strip()
             slogan = (data.get("slogan") or "").strip()
-            
+
             if not name or not slogan:
                 return jsonify({"error": "店铺名称和简介不能为空"}), 400
-            
+
             try:
                 kb = self.dialogue_manager.knowledge_base
                 merchant = kb.get_merchant(merchant_id)
                 if not merchant:
                     return jsonify({"error": "商户不存在"}), 404
-                
+
                 # 更新商户信息
                 merchant["name"] = name
                 merchant["slogan"] = slogan
+                if data.get("category"):
+                    merchant["category"] = data["category"].strip()
+                if data.get("hours"):
+                    merchant["hours"] = data["hours"].strip()
+                if data.get("address"):
+                    merchant["address"] = data["address"].strip()
+
+                # 处理封面图片上传
+                cover_image = data.get("cover_image", "")
+                if cover_image and cover_image.startswith("data:image"):
+                    ext = re.search(r'image/(\w+)', cover_image)
+                    ext = ext.group(1) if ext else "png"
+                    if ext == "svg+xml":
+                        ext = "svg"
+                    filename = f"{merchant_id}_cover.{ext}"
+                    filepath = os.path.join(self.app.root_path, "static", "img", "shops", filename)
+                    img_data = re.sub(r'^data:image/\w+;base64,', '', cover_image)
+                    with open(filepath, "wb") as f:
+                        f.write(base64.b64decode(img_data))
+                    merchant["cover"] = f"/static/img/shops/{filename}"
+
+                # 处理头像图片上传
+                avatar_image = data.get("avatar_image", "")
+                if avatar_image and avatar_image.startswith("data:image"):
+                    ext = re.search(r'image/(\w+)', avatar_image)
+                    ext = ext.group(1) if ext else "png"
+                    if ext == "svg+xml":
+                        ext = "svg"
+                    filename = f"{merchant_id}_avatar.{ext}"
+                    filepath = os.path.join(self.app.root_path, "static", "img", "shops", filename)
+                    img_data = re.sub(r'^data:image/\w+;base64,', '', avatar_image)
+                    with open(filepath, "wb") as f:
+                        f.write(base64.b64decode(img_data))
+                    merchant["avatar"] = f"/static/img/shops/{filename}"
+
                 kb.save_all(kb.merchants)
-                
+
                 return jsonify({"success": True, "merchant": merchant})
             except Exception as exc:
                 return jsonify({"error": f"更新失败：{exc}"}), 500
+
+        @self.app.route("/api/merchant/visit", methods=["POST"])
+        @self.login_required()
+        def track_merchant_visit():
+            data = request.get_json(silent=True) or {}
+            merchant_id = data.get("merchant_id", "")
+            if not merchant_id:
+                return jsonify({"error": "merchant_id required"}), 400
+            stats = self._ensure_merchant_stats(merchant_id)
+            today = datetime.datetime.now().strftime("%Y-%m-%d")
+            stats["visits"][today] = stats["visits"].get(today, 0) + 1
+            self.auth._save()
+            return jsonify({"success": True})
+
+        @self.app.route("/api/merchant/consult", methods=["POST"])
+        @self.login_required()
+        def track_merchant_consult():
+            data = request.get_json(silent=True) or {}
+            merchant_id = data.get("merchant_id", "")
+            if not merchant_id:
+                return jsonify({"error": "merchant_id required"}), 400
+            stats = self._ensure_merchant_stats(merchant_id)
+            today = datetime.datetime.now().strftime("%Y-%m-%d")
+            stats["consultations"][today] = stats["consultations"].get(today, 0) + 1
+            self.auth._save()
+            return jsonify({"success": True})
 
         @self.app.route("/api/merchant/messages", methods=["GET"])
         @self.login_required(["merchant", "super_admin"])
@@ -1118,7 +1183,16 @@ class WebUI:
         }
 
     def _visible_merchants(self):
-        return self.dialogue_manager.knowledge_base.list_merchants()
+        merchants = self.dialogue_manager.knowledge_base.list_merchants()
+        # 用评论平均分覆盖商家评分
+        comments_data = self.auth.data.get("comments", {})
+        for m in merchants:
+            mid = m["id"]
+            ratings = [c.get("rating", 0) for c in comments_data.get(mid, []) if c.get("rating")]
+            if ratings:
+                avg = sum(ratings) / len(ratings)
+                m["rating"] = f"{avg:.1f}"
+        return merchants
 
     def _admin_merchants(self):
         user = self.current_user()
@@ -1134,13 +1208,43 @@ class WebUI:
         merchant_id = request.args.get("merchant")
         if user and user.get("role") == "merchant":
             merchant_id = user.get("merchant_id")
-        return self.dialogue_manager.knowledge_base.get_merchant(merchant_id or "tea_shop")
+        merchant = self.dialogue_manager.knowledge_base.get_merchant(merchant_id or "tea_shop")
+        if merchant:
+            # 用评论平均分覆盖评分
+            ratings = [c.get("rating", 0) for c in self.auth.data.get("comments", {}).get(merchant["id"], []) if c.get("rating")]
+            if ratings:
+                merchant["rating"] = f"{sum(ratings) / len(ratings):.1f}"
+        return merchant
 
     def _merchant_scope(self, merchant_id: str) -> str:
         user = self.current_user()
         if user and user.get("role") == "merchant":
             return user.get("merchant_id", merchant_id)
         return merchant_id
+
+    def _ensure_merchant_stats(self, merchant_id: str) -> Dict:
+        """Ensure merchant stats exist and return them."""
+        if "merchant_stats" not in self.auth.data:
+            self.auth.data["merchant_stats"] = {}
+        if merchant_id not in self.auth.data["merchant_stats"]:
+            self.auth.data["merchant_stats"][merchant_id] = {
+                "visits": {},
+                "consultations": {},
+                "favorites": 0
+            }
+        return self.auth.data["merchant_stats"][merchant_id]
+
+    def _get_merchant_stats(self, merchant_id: str) -> Dict:
+        """Get today's stats for a merchant."""
+        stats = self._ensure_merchant_stats(merchant_id)
+        today = datetime.datetime.now().strftime("%Y-%m-%d")
+        today_visits = stats["visits"].get(today, 0)
+        today_consultations = stats["consultations"].get(today, 0)
+        return {
+            "today_visits": today_visits,
+            "today_consultations": today_consultations,
+            "total_favorites": stats.get("favorites", 0)
+        }
 
     def _ensure_merchant(self, application: Dict) -> None:
         kb = self.dialogue_manager.knowledge_base

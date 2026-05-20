@@ -12,9 +12,9 @@
     <main class="merchant-main">
         <h1>工作台概览</h1>
         <section class="metric-grid">
-            <div class="metric-card"><span>今日访客</span><strong>128</strong></div>
-            <div class="metric-card"><span>今日咨询</span><strong>34</strong></div>
-            <div class="metric-card"><span>累计收藏</span><strong>256</strong></div>
+            <div class="metric-card"><span>今日访客</span><strong>{{ stats.today_visits }}</strong></div>
+            <div class="metric-card"><span>今日咨询</span><strong>{{ stats.today_consultations }}</strong></div>
+            <div class="metric-card"><span>累计收藏</span><strong>{{ stats.total_favorites }}</strong></div>
             <div class="metric-card"><span>店铺评分</span><strong>{{ merchant.rating }}</strong></div>
         </section>
         <section class="merchant-panel">
