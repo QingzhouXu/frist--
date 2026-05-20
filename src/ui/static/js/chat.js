@@ -217,7 +217,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function showTypingIndicator() {
         var el = document.createElement('div');
         el.className = 'message bot-message typing-message';
-        el.innerHTML = '<div class="avatar bot-avatar">AI</div><div class="message-content"><div class="message-text typing-indicator"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div></div>';
+        el.innerHTML = '<div class="avatar bot-avatar">AI</div><div class="message-content"><div class="message-text typing-indicator"><span class="shining-text">AI is Thinking...</span></div></div>';
         chatContainer.appendChild(el);
         scrollToBottom();
         return el;

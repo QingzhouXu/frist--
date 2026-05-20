@@ -720,7 +720,7 @@ html.dark .theme-toggle-btn .moon-icon {
 
 .avatar-pill-dropdown {
     position: absolute;
-    top: calc(100% + 8px);
+    top: calc(100% - 1px);
     right: 0;
     background: var(--card);
     border: 1px solid var(--border);
@@ -728,16 +728,16 @@ html.dark .theme-toggle-btn .moon-icon {
     box-shadow: 0 4px 24px rgba(0,0,0,0.12);
     min-width: 140px;
     opacity: 0;
-    visibility: hidden;
-    transform: translateY(-8px);
+    pointer-events: none;
+    transform: translateY(-4px);
     transition: all 0.2s ease;
     z-index: 100;
     overflow: hidden;
 }
 
-.user-avatar-pill:hover .avatar-pill-dropdown {
+.user-avatar-pill.open .avatar-pill-dropdown {
     opacity: 1;
-    visibility: visible;
+    pointer-events: auto;
     transform: translateY(0);
 }
 
@@ -1923,13 +1923,30 @@ html.dark .theme-toggle-btn .moon-icon {
     font-style: italic;
 }
 
-/* Typing indicator */
+/* Typing indicator — shining text */
 .typing-indicator {
     display: flex;
     align-items: center;
-    gap: 4px;
     padding: 14px 16px;
 }
+.shining-text {
+    display: inline-block;
+    font-size: 14px;
+    font-weight: 500;
+    background: linear-gradient(110deg, var(--muted-foreground), 35%, #fff, 50%, var(--muted-foreground), 75%, var(--muted-foreground));
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    animation: shimmer-text 2s linear infinite;
+}
+@keyframes shimmer-text {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* Keep old typing dots for fallback */
 .typing-dot {
     width: 7px;
     height: 7px;
@@ -1985,6 +2002,9 @@ html.dark .theme-toggle-btn .moon-icon {
 .dark .quick-reply-btn:hover {
     background: rgba(255, 255, 255, 0.12);
     border-color: var(--primary);
+}
+.dark .shining-text {
+    background-image: linear-gradient(110deg, rgba(255,255,255,0.45), 35%, #fff, 50%, rgba(255,255,255,0.45), 75%, rgba(255,255,255,0.45));
 }
 /* Chat input row — rounded pill */
 .chat-input-row {

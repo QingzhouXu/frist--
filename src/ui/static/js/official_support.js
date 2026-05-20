@@ -1,8 +1,11 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const chatMessages = document.getElementById('chat-messages');
-    const messageInput = document.getElementById('message-input');
-    const sendBtn = document.getElementById('send-btn');
-    const chatForm = document.getElementById('chat-form');
+document.addEventListener('DOMContentLoaded', function () {
+    var chatMessages = document.getElementById('chat-messages');
+    var messageInput = document.getElementById('message-input');
+    var sendBtn = document.getElementById('send-btn');
+    var chatForm = document.getElementById('chat-form');
+
+    var officialAvatarSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>';
+    var userAvatarSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
 
     initEventListeners();
     loadMyMessages();
@@ -15,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
             sendBtn.addEventListener('click', sendMessage);
         }
         if (messageInput) {
-            messageInput.addEventListener('keydown', (e) => {
+            messageInput.addEventListener('keydown', function (e) {
                 if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
                     sendMessage();
@@ -26,10 +29,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function loadMyMessages() {
         fetch('/api/official-support/my-messages')
-            .then(function(r) { return r.json(); })
-            .then(function(data) {
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
                 if (data.messages && data.messages.length > 0) {
-                    data.messages.forEach(function(msg) {
+                    data.messages.forEach(function (msg) {
                         var type = msg.type === 'admin_reply' ? 'official' : 'user';
                         addMessage(msg.message, type, msg.timestamp);
                     });
@@ -37,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     addWelcomeMessage();
                 }
             })
-            .catch(function() {
+            .catch(function () {
                 addWelcomeMessage();
             });
     }
@@ -46,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (chatMessages && chatMessages.children.length === 0) {
             var welcome = document.createElement('div');
             welcome.className = 'message official';
-            welcome.innerHTML = '<div class="message-avatar">🎯</div><div class="message-content"><div>您好！欢迎联系官方客服，请描述您的问题。</div></div>';
+            welcome.innerHTML = '<div class="message-avatar">' + officialAvatarSvg + '</div><div class="message-content"><div>您好！欢迎联系官方客服，请描述您的问题。</div></div>';
             chatMessages.appendChild(welcome);
         }
     }
@@ -71,22 +74,22 @@ document.addEventListener('DOMContentLoaded', () => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ message: message, user_info: { username: username } })
         })
-        .then(function(r) { return r.json(); })
-        .then(function(data) {
-            if (data.success && data.response) {
-                addMessage(data.response, 'official');
-            }
-        })
-        .catch(function() {
-            var fallback = generateOfficialResponse(message);
-            addMessage(fallback, 'official');
-        })
-        .finally(function() {
-            if (sendBtn) {
-                sendBtn.disabled = false;
-                sendBtn.textContent = '发送';
-            }
-        });
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                if (data.success && data.response) {
+                    addMessage(data.response, 'official');
+                }
+            })
+            .catch(function () {
+                var fallback = generateOfficialResponse(message);
+                addMessage(fallback, 'official');
+            })
+            .finally(function () {
+                if (sendBtn) {
+                    sendBtn.disabled = false;
+                    sendBtn.textContent = '发送';
+                }
+            });
     }
 
     function addMessage(content, type, timestamp) {
@@ -94,7 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
         var messageDiv = document.createElement('div');
         messageDiv.className = 'message ' + type;
 
-        var avatar = type === 'user' ? '👤' : '🎯';
+        var avatar = type === 'user' ? userAvatarSvg : officialAvatarSvg;
         var time = timestamp
             ? new Date(timestamp).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
             : new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
@@ -151,4 +154,54 @@ document.addEventListener('DOMContentLoaded', () => {
     if (messageInput) {
         messageInput.focus();
     }
+
+    // ── 3D tilt effect for sidebar cards and chat widget ──
+    (function() {
+        function applyTilt(elements, strength) {
+            strength = strength || 6;
+            elements.forEach(function(card) {
+                var rafId = null;
+                var targetRx = 0, targetRy = 0;
+                var currentRx = 0, currentRy = 0;
+
+                card.addEventListener('mousemove', function(e) {
+                    var rect = card.getBoundingClientRect();
+                    targetRx = ((e.clientY - rect.top) / rect.height - 0.5) * -strength;
+                    targetRy = ((e.clientX - rect.left) / rect.width - 0.5) * strength;
+                    if (!rafId) {
+                        rafId = requestAnimationFrame(update);
+                    }
+                });
+
+                card.addEventListener('mouseleave', function() {
+                    targetRx = 0;
+                    targetRy = 0;
+                    if (!rafId) {
+                        rafId = requestAnimationFrame(update);
+                    }
+                });
+
+                function update() {
+                    currentRx += (targetRx - currentRx) * 0.12;
+                    currentRy += (targetRy - currentRy) * 0.12;
+
+                    var settled = Math.abs(targetRx - currentRx) < 0.01 && Math.abs(targetRy - currentRy) < 0.01;
+
+                    if (settled && targetRx === 0 && targetRy === 0) {
+                        card.style.transform = '';
+                        rafId = null;
+                    } else if (settled) {
+                        card.style.transform = 'perspective(1200px) rotateX(' + targetRx.toFixed(2) + 'deg) rotateY(' + targetRy.toFixed(2) + 'deg)';
+                        rafId = null;
+                    } else {
+                        card.style.transform = 'perspective(1200px) rotateX(' + currentRx.toFixed(2) + 'deg) rotateY(' + currentRy.toFixed(2) + 'deg)';
+                        rafId = requestAnimationFrame(update);
+                    }
+                }
+            });
+        }
+
+        applyTilt(document.querySelectorAll('.support-info-card, .support-quick-links'), 12);
+        applyTilt(document.querySelectorAll('.support-chat'), 6);
+    })();
 });

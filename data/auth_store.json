@@ -248,6 +248,36 @@
       "original_message_id": "15",
       "admin_user": "admin",
       "timestamp": "2026-05-19T23:49:46.939024"
+    },
+    {
+      "id": "18",
+      "type": "user",
+      "message": "你好",
+      "username": "用户昵称_张三",
+      "timestamp": "2026-05-20T12:56:13.973638",
+      "status": "unread"
+    },
+    {
+      "id": "19",
+      "type": "official",
+      "message": "很高兴为您服务！如果您有其他问题，随时可以询问。",
+      "timestamp": "2026-05-20T12:56:13.973638",
+      "status": "sent"
+    },
+    {
+      "id": "20",
+      "type": "user",
+      "message": "你是谁",
+      "username": "用户昵称_张三",
+      "timestamp": "2026-05-20T12:56:17.507467",
+      "status": "unread"
+    },
+    {
+      "id": "21",
+      "type": "official",
+      "message": "您的反馈对我们很重要。请告诉我更多详细信息，以便更好地帮助您。",
+      "timestamp": "2026-05-20T12:56:17.507467",
+      "status": "sent"
     }
   ],
   "comments": {

@@ -7,18 +7,81 @@
     <title>官方客服 - AI智能客服平台</title>
     <link rel="stylesheet" href="/static/css/style.css">
     <style>
+        /* ── 3D tilt will-change optimization ── */
+        .support-info-card,
+        .support-quick-links,
+        .support-chat {
+            will-change: transform;
+            transform-style: preserve-3d;
+        }
+
+        /* ── Background glow blobs ── */
         .official-support {
-            background: var(--background);
+            position: relative;
+            overflow: hidden;
+            background: #f7f4f0;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
         }
+        .dark .official-support {
+            background: var(--background);
+        }
+        .support-glow-top {
+            position: fixed;
+            top: -20vh;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100vh;
+            height: 50vh;
+            border-radius: 50%;
+            background: var(--primary);
+            opacity: 0.18;
+            filter: blur(100px);
+            pointer-events: none;
+            z-index: 0;
+            animation: support-float-top 10s ease-in-out infinite;
+        }
+        .support-glow-bottom {
+            position: fixed;
+            bottom: -20vh;
+            right: 10%;
+            width: 80vh;
+            height: 60vh;
+            border-radius: 50%;
+            background: var(--chart-2);
+            opacity: 0.15;
+            filter: blur(90px);
+            pointer-events: none;
+            z-index: 0;
+            animation: support-float-bottom 8s ease-in-out 2s infinite;
+        }
+        .dark .support-glow-top { opacity: 0.08; }
+        .dark .support-glow-bottom { opacity: 0.06; }
+        @keyframes support-float-top {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            33% { transform: translateX(-45%) translateY(-15px); }
+            66% { transform: translateX(-55%) translateY(10px); }
+        }
+        @keyframes support-float-bottom {
+            0%, 100% { transform: translateY(0); }
+            33% { transform: translateX(10px) translateY(-10px); }
+            66% { transform: translateX(-8px) translateY(8px); }
+        }
 
+        /* ── Header — acrylic ── */
         .support-header {
-            background: var(--card);
-            border-bottom: 1px solid var(--border);
+            position: relative;
+            z-index: 1;
+            background: rgba(238, 242, 250, 0.72);
+            backdrop-filter: blur(20px) saturate(160%);
+            -webkit-backdrop-filter: blur(20px) saturate(160%);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.07);
             padding: 16px 0;
-            backdrop-filter: blur(12px);
+        }
+        .dark .support-header {
+            background: rgba(38, 38, 38, 0.5);
+            border-bottom-color: rgba(255, 255, 255, 0.08);
         }
 
         .support-header-content {
@@ -43,12 +106,11 @@
         .support-logo-icon {
             width: 42px;
             height: 42px;
-            background: var(--primary);
+            background: linear-gradient(135deg, var(--primary), var(--chart-2));
             border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
             color: var(--primary-foreground);
         }
 
@@ -68,10 +130,13 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 16px;
+            color: var(--muted-foreground);
         }
 
+        /* ── Main layout ── */
         .support-main {
+            position: relative;
+            z-index: 1;
             flex: 1;
             max-width: 1200px;
             margin: 0 auto;
@@ -89,27 +154,26 @@
             gap: 16px;
         }
 
-        .support-chat {
-            flex: 1;
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
-            display: flex;
-            flex-direction: column;
-            height: 640px;
-            overflow: hidden;
-        }
-
-        .support-info-card {
-            background: var(--card);
-            border: 1px solid var(--border);
+        /* ── Sidebar cards — acrylic ── */
+        .support-info-card,
+        .support-quick-links {
+            background: rgba(238, 242, 250, 0.62);
+            backdrop-filter: blur(20px) saturate(160%);
+            -webkit-backdrop-filter: blur(20px) saturate(160%);
+            border: 1px solid rgba(0, 0, 0, 0.07);
             border-radius: 16px;
             padding: 24px;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+            box-shadow: 0 6px 28px rgba(0, 0, 0, 0.07), 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+        .dark .support-info-card,
+        .dark .support-quick-links {
+            background: rgba(38, 38, 38, 0.4);
+            border-color: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
         }
 
-        .support-info-card h3 {
+        .support-info-card h3,
+        .support-quick-links h3 {
             color: var(--foreground);
             margin-bottom: 16px;
             font-size: 16px;
@@ -122,39 +186,22 @@
             margin-bottom: 12px;
             color: var(--muted-foreground);
             font-size: 14px;
+            gap: 10px;
         }
 
-        .support-info-icon {
-            width: 22px;
-            height: 22px;
-            margin-right: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-        }
-
-        .support-quick-links {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 24px;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
-        }
-
-        .support-quick-links h3 {
-            color: var(--foreground);
-            margin-bottom: 14px;
-            font-size: 16px;
-            font-weight: 600;
+        .support-info-item svg {
+            flex-shrink: 0;
         }
 
         .quick-link-item {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
             padding: 12px 16px;
-            background: var(--secondary);
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(0, 0, 0, 0.04);
             border-radius: 12px;
             color: var(--foreground);
             text-decoration: none;
@@ -162,21 +209,59 @@
             font-size: 14px;
             transition: all 0.25s ease;
         }
-
+        .quick-link-item:last-child { margin-bottom: 0; }
         .quick-link-item:hover {
             background: var(--accent);
             color: var(--accent-foreground);
             transform: translateX(4px);
+            border-color: var(--primary);
+            box-shadow: 0 4px 16px rgba(59, 130, 246, 0.12);
+        }
+        .dark .quick-link-item {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(255, 255, 255, 0.06);
+        }
+        .dark .quick-link-item:hover {
+            background: rgba(59, 130, 246, 0.15);
+            border-color: var(--primary);
         }
 
+        /* ── Chat widget — acrylic ── */
+        .support-chat {
+            flex: 1;
+            background: rgba(238, 242, 250, 0.62);
+            backdrop-filter: blur(20px) saturate(160%);
+            -webkit-backdrop-filter: blur(20px) saturate(160%);
+            border: 1px solid rgba(0, 0, 0, 0.07);
+            border-radius: 20px;
+            box-shadow: 0 6px 28px rgba(0, 0, 0, 0.07), 0 2px 8px rgba(0, 0, 0, 0.04);
+            display: flex;
+            flex-direction: column;
+            height: 640px;
+            overflow: hidden;
+        }
+        .dark .support-chat {
+            background: rgba(38, 38, 38, 0.4);
+            border-color: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        /* ── Chat header — frosted glass ── */
         .chat-header {
-            background: var(--primary);
-            color: var(--primary-foreground);
+            background: rgba(238, 242, 250, 0.72);
+            backdrop-filter: blur(20px) saturate(160%);
+            -webkit-backdrop-filter: blur(20px) saturate(160%);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.07);
+            color: var(--foreground);
             padding: 20px 24px;
             border-radius: 20px 20px 0 0;
             display: flex;
             align-items: center;
             justify-content: space-between;
+        }
+        .dark .chat-header {
+            background: rgba(38, 38, 38, 0.5);
+            border-bottom-color: rgba(255, 255, 255, 0.08);
         }
 
         .chat-header-info {
@@ -188,12 +273,12 @@
         .chat-avatar {
             width: 42px;
             height: 42px;
-            background: rgba(255, 255, 255, 0.2);
+            background: linear-gradient(135deg, var(--primary), var(--chart-2));
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 18px;
+            color: var(--primary-foreground);
         }
 
         .chat-status {
@@ -204,18 +289,29 @@
         .chat-name {
             font-weight: 600;
             font-size: 16px;
+            color: var(--foreground);
         }
 
         .chat-status-text {
             font-size: 12px;
-            opacity: 0.85;
+            color: var(--muted-foreground);
         }
 
+        .chat-status-dot {
+            width: 8px;
+            height: 8px;
+            background: #22c55e;
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 6px rgba(34, 197, 94, 0.5);
+        }
+
+        /* ── Messages area ── */
         .chat-messages {
             flex: 1;
             padding: 24px;
             overflow-y: auto;
-            background: var(--background);
+            background: transparent;
             display: flex;
             flex-direction: column;
             gap: 16px;
@@ -226,7 +322,6 @@
             align-items: flex-start;
             gap: 10px;
         }
-
         .message.user {
             justify-content: flex-end;
         }
@@ -238,19 +333,16 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 14px;
             flex-shrink: 0;
         }
-
         .message.user .message-avatar {
             order: 2;
             background: var(--primary);
             color: var(--primary-foreground);
         }
-
         .message.official .message-avatar {
-            background: var(--accent);
-            color: var(--accent-foreground);
+            background: linear-gradient(135deg, var(--primary), var(--chart-2));
+            color: var(--primary-foreground);
         }
 
         .message-content {
@@ -261,18 +353,22 @@
             font-size: 14px;
             line-height: 1.5;
         }
-
         .message.official .message-content {
-            background: var(--card);
+            background: rgba(238, 242, 250, 0.7);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             color: var(--foreground);
-            border: 1px solid var(--border);
+            border: 1px solid rgba(0, 0, 0, 0.06);
             border-bottom-left-radius: 4px;
         }
-
         .message.user .message-content {
             background: var(--primary);
             color: var(--primary-foreground);
             border-bottom-right-radius: 4px;
+        }
+        .dark .message.official .message-content {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.08);
         }
 
         .message-time {
@@ -281,10 +377,17 @@
             margin-top: 6px;
         }
 
+        /* ── Chat input — liquid glass ── */
         .chat-input {
             padding: 20px 24px;
-            background: var(--card);
-            border-top: 1px solid var(--border);
+            background: rgba(238, 242, 250, 0.5);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-top: 1px solid rgba(0, 0, 0, 0.06);
+        }
+        .dark .chat-input {
+            background: rgba(38, 38, 38, 0.35);
+            border-top-color: rgba(255, 255, 255, 0.08);
         }
 
         .chat-input-form {
@@ -295,20 +398,33 @@
         .chat-input-field {
             flex: 1;
             padding: 13px 18px;
-            border: 2px solid var(--border);
+            border: 1px solid rgba(0, 0, 0, 0.08);
             border-radius: 28px;
             font-size: 14px;
-            background: var(--input);
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             color: var(--foreground);
-            transition: border-color 0.25s ease;
+            transition: all 0.25s ease;
         }
-
+        .chat-input-field::placeholder {
+            color: var(--muted-foreground);
+        }
         .chat-input-field:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.08);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+            background: rgba(255, 255, 255, 0.7);
+        }
+        .dark .chat-input-field {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+        .dark .chat-input-field:focus {
+            background: rgba(255, 255, 255, 0.1);
         }
 
+        /* ── Send button — liquid glass ── */
         .chat-send-btn {
             padding: 13px 24px;
             background: var(--primary);
@@ -319,14 +435,16 @@
             font-weight: 600;
             font-size: 14px;
             transition: all 0.25s ease;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.25), 0 2px 8px rgba(59,130,246,0.2);
         }
-
         .chat-send-btn:hover {
             background: var(--chart-2);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.35);
+            transform: scale(1.04);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 6px 20px rgba(59,130,246,0.35);
         }
-
+        .chat-send-btn:active {
+            transform: scale(0.96);
+        }
         .chat-send-btn:disabled {
             opacity: 0.55;
             cursor: not-allowed;
@@ -334,6 +452,7 @@
             box-shadow: none;
         }
 
+        /* ── Responsive ── */
         @media (max-width: 768px) {
             .support-main {
                 flex-direction: column;
@@ -346,14 +465,22 @@
     </style>
 </head>
 <body class="official-support">
+    <!-- 背景光晕 -->
+    <div class="support-glow-top"></div>
+    <div class="support-glow-bottom"></div>
+
     <header class="support-header">
         <div class="support-header-content">
             <a href="/" class="support-logo">
-                <div class="support-logo-icon">🎯</div>
+                <div class="support-logo-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                </div>
                 <span>官方客服</span>
             </a>
             <div class="support-user-info">
-                <div class="support-avatar">👤</div>
+                <div class="support-avatar">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </div>
                 <span>{{ current_user.display_name if current_user else '访客用户' }}</span>
             </div>
         </div>
@@ -364,27 +491,42 @@
             <div class="support-info-card">
                 <h3>客服信息</h3>
                 <div class="support-info-item">
-                    <div class="support-info-icon">⏰</div>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                     <span>工作时间：9:00 - 21:00</span>
                 </div>
                 <div class="support-info-item">
-                    <div class="support-info-icon">⚡</div>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
                     <span>平均响应：&lt; 30秒</span>
                 </div>
                 <div class="support-info-item">
-                    <div class="support-info-icon">🎯</div>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
                     <span>服务满意度：98%</span>
                 </div>
             </div>
 
             <div class="support-quick-links">
                 <h3>快速帮助</h3>
-                <a href="/" class="quick-link-item">🏪 浏览商家</a>
-                <a href="/categories" class="quick-link-item">🔍 搜索服务</a>
-                <a href="/favorites" class="quick-link-item">🤍 我的收藏</a>
-                <a href="/merchant/apply" class="quick-link-item">📝 商户入驻</a>
+                <a href="/" class="quick-link-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    浏览商家
+                </a>
+                <a href="/categories" class="quick-link-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    搜索服务
+                </a>
+                <a href="/favorites" class="quick-link-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                    我的收藏
+                </a>
+                <a href="/merchant/apply" class="quick-link-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                    商户入驻
+                </a>
                 {% if not current_user %}
-                <a href="/login" class="quick-link-item">🔐 用户登录</a>
+                <a href="/login" class="quick-link-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    用户登录
+                </a>
                 {% endif %}
             </div>
         </aside>
@@ -392,20 +534,24 @@
         <section class="support-chat">
             <div class="chat-header">
                 <div class="chat-header-info">
-                    <div class="chat-avatar">🎯</div>
+                    <div class="chat-avatar">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                    </div>
                     <div class="chat-status">
                         <div class="chat-name">官方客服助手</div>
                         <div class="chat-status-text">在线服务中</div>
                     </div>
                 </div>
                 <div>
-                    <span style="width: 8px; height: 8px; background: #22c55e; border-radius: 50%; display: inline-block;"></span>
+                    <span class="chat-status-dot"></span>
                 </div>
             </div>
 
             <div class="chat-messages" id="chat-messages">
                 <div class="message official">
-                    <div class="message-avatar">🎯</div>
+                    <div class="message-avatar">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                    </div>
                     <div class="message-content">
                         <div>您好！欢迎使用AI智能客服平台！</div>
                         <div>我是官方客服助手，有什么可以帮助您的吗？</div>
